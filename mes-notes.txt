@@ -1,0 +1,6 @@
+# Quelques notes ou trucs à faire
+
+##Notes
+
+## TODO
++ Dockerisation app  https://spring.io/guides/gs/spring-boot-docker/
