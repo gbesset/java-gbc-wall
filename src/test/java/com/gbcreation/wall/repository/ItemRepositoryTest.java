@@ -4,7 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalField;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
@@ -71,7 +80,7 @@ public class ItemRepositoryTest {
 	  	//Assert Update
 	  	itemSaved.setDescription("This is a description of the item");
 	  	itemRepository.save(itemSaved);
-	  	Item itemUpdated = itemRepository.findById(itemSaved.getId());
+	  	Item itemUpdated = itemRepository.findOne(itemSaved.getId());
 	  	assertEquals("This is a description of the item", itemUpdated.getDescription());
 	  	 
 	  	//Assert Delete
@@ -81,6 +90,23 @@ public class ItemRepositoryTest {
 	  }
 	  
 	 @Test
+	  public void test_count() {
+		//Assert Create
+		assertEquals(0, itemRepository.count());
+	  	
+	    itemRepository.save(new Item("picture1.jpg","/some/local/folder/","First Picture",ItemType.PICTURE));
+	    itemRepository.save(new Item("video 1","http://some/path/","First video",ItemType.VIDEO));
+	    itemRepository.save(new Item("video 2","http://some/youtube/path/","second Video",ItemType.VIDEO_YOUTUBE));
+	    itemRepository.save(new Item("video 3","http://some/vimeo/path/","third Video",ItemType.VIDEO_VIMEO));
+	  	
+	    assertEquals(4, itemRepository.count());
+	    assertEquals(1, itemRepository.count(ItemFilterSpecifications.isItemPicture()));
+	    assertEquals(3, itemRepository.count(ItemFilterSpecifications.isItemVideo()));
+	    
+	    itemRepository.deleteAll();
+	  }
+	 
+	 @Test
 	  public void test_findBy_some_attribute() {
 		 for(Item it : createSomeItems()) {
 			 itemRepository.save(it);
@@ -89,18 +115,82 @@ public class ItemRepositoryTest {
 		 List<Item> results = itemRepository.findByFile("codevideo2");
 		 assertEquals("codevideo2", results.get(0).getFile());
 		 
+		 results = itemRepository.findByFileContaining("codev");
+		 assertEquals(5, results.size());
+		 assertEquals("codevideo1", results.get(0).getFile());
+		 assertEquals("codevideo5", results.get(4).getFile());
+		 
+		 results = itemRepository.findByFileContaining(".png");
+		 assertEquals(2, results.size());
+		 assertEquals("picture2.png", results.get(0).getFile());
+		 assertEquals("picture5.png", results.get(1).getFile());
+		 
 		 results = itemRepository.findByFileMyRqt("codevideo2");
 		 assertEquals("codevideo2", results.get(0).getFile());
+	 }
+	 
+	 @Test
+	  public void test_filtering_on_description() {
+		 for(Item it : createSomeItems()) {
+			 itemRepository.save(it);
+		 }
 		 
-		 results = itemRepository.findByDescriptionContaining("Fourth Picture");
+		 List<Item> results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("Fourth Picture"));
 		 assertEquals("picture4.jpg", results.get(0).getFile());
 		 
-		 results = itemRepository.findByDescriptionContaining("Seventh");
+		 results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("Seventh"));
 		 assertEquals("picture7.jpg", results.get(0).getFile());
 		 
-		 results = itemRepository.findByDescriptionContaining("Picture");
+		 results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("Picture"));
 		 assertEquals(7, results.size());
+		 
+		 results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("th"));
+		 assertEquals(4, results.size());
+		 assertEquals("picture4.jpg", results.get(0).getFile());
+		 
 	  }
+	 
+	 @Test
+	  public void test_filtering_on_type() {
+		 for(Item it : createSomeItems()) {
+			 itemRepository.save(it);
+		 }
+		  assertEquals(12, iterableSize(itemRepository.findAll()));
+		  assertEquals(7, itemRepository.findAll(ItemFilterSpecifications.isItemPicture()).size());
+		  assertEquals(5, itemRepository.findAll(ItemFilterSpecifications.isItemVideo()).size());
+	  }
+	 
+	 
+	 @Test
+	  public void test_filtering_on_creation_date() {
+		 for(Item it : createSomeItems()) {
+			 itemRepository.save(it);
+		 }
+
+		 LocalDate today = LocalDate.of(2018,4,10);
+		 LocalDate lastYearJanuaryFirst = LocalDate.of(2017, 1, 1);
+		 LocalDate currentYearJanuaryFirst = LocalDate.of(2018, 1, 1);
+		 LocalDate currentYearSomeDaysBefore = LocalDate.of(2018, 4, 1);
+		 
+		 assertEquals(12, iterableSize(itemRepository.findAll()));
+
+		 //Année précédente
+		 assertEquals(4, itemRepository.findAll(ItemFilterSpecifications.periodFromTo(convertLocalDateToDate(lastYearJanuaryFirst),convertLocalDateToDate(currentYearJanuaryFirst))).size());
+		 //Cette année
+		 assertEquals(8, itemRepository.findAll(ItemFilterSpecifications.periodFromTo(convertLocalDateToDate(currentYearJanuaryFirst),convertLocalDateToDate(today))).size());
+		 //Entré début année et 1er Avril
+		 assertEquals(3, itemRepository.findAll(ItemFilterSpecifications.periodFromTo(convertLocalDateToDate(currentYearJanuaryFirst),convertLocalDateToDate(currentYearSomeDaysBefore))).size());
+		 //entre 1er avvriil et aujourdhui
+		 assertEquals(5, itemRepository.findAll(ItemFilterSpecifications.periodFromTo(convertLocalDateToDate(currentYearSomeDaysBefore),convertLocalDateToDate(today))).size());
+		 //le 1er avril entre le 1er et le 2
+		 assertEquals(1, itemRepository.findAll(ItemFilterSpecifications.periodFromTo(convertLocalDateToDate(currentYearSomeDaysBefore),convertLocalDateToDate(LocalDate.of(2018, 4, 2)))).size());
+	  }
+	 
+	 @Test
+	  public void test_filtering_on_nb_like() {
+		 fail("not yet implemented");
+	  }
+	 
 	 
 	  @Test
 	  public void test_paginate() {
@@ -108,7 +198,6 @@ public class ItemRepositoryTest {
 				 itemRepository.save(it);
 			 }
 		    assertEquals(12, itemRepository.count());
-		    
 		    
 		    //find by description
 		    Sort sort = new Sort(new Sort.Order(Direction.DESC, "file"));
@@ -122,7 +211,7 @@ public class ItemRepositoryTest {
 		    pageable = new PageRequest(1, 5, sort);
 		    itemFound = itemRepository.findByDescriptionContaining("Picture", pageable);
 		    assertEquals(2, itemFound.size());
-		    assertEquals("picture2.jpg", itemFound.get(0).getFile());
+		    assertEquals("picture2.png", itemFound.get(0).getFile());
 		    assertEquals("picture1.jpg", itemFound.get(1).getFile());
 			 
 			
@@ -138,26 +227,93 @@ public class ItemRepositoryTest {
 	  }
 	  
 	  @Test
-	  public void testFilter() {
-		  fail("not yet implemented");
+	  public void test_paginate_with_type_filtering() {
+		  for(Item it : createSomeItems()) {
+				 itemRepository.save(it);
+			 }
+		    assertEquals(12, itemRepository.count());
+		    
+		    //find by description
+		    Sort sort = new Sort(new Sort.Order(Direction.DESC, "file"));
+		    Pageable pageable = new PageRequest(0, 5, sort);
+
+		    //find by images by description
+		    //todo
+		    fail("not yet implemented");
+			
+		    //find all images
+		    // 2ère page de résultats ; 3 résultats max par page.
+		    Page<Item> allItemPaginated = itemRepository.findAll(ItemFilterSpecifications.isItemPicture(),new PageRequest(2, 3));
+		 
+		    assertEquals(2, allItemPaginated.getNumber());
+		    assertEquals(3, allItemPaginated.getSize()); 				// la taille de la pagination
+		    assertEquals(7, allItemPaginated.getTotalElements()); 	//nb total d'éléments récupérables
+		    assertEquals(3, allItemPaginated.getTotalPages()); 		// nombre de pages total
+		    assertTrue(allItemPaginated.hasContent());
+		    
+		    //find all videos
+		    // 2ère page de résultats ; 3 résultats max par page.
+		    allItemPaginated = itemRepository.findAll(ItemFilterSpecifications.isItemVideo(),new PageRequest(2, 3));
+		 
+		    assertEquals(2, allItemPaginated.getNumber());
+		    assertEquals(2, allItemPaginated.getSize()); 				// la taille de la pagination
+		    assertEquals(5, allItemPaginated.getTotalElements()); 	//nb total d'éléments récupérables
+		    assertEquals(2, allItemPaginated.getTotalPages()); 		// nombre de pages total
+		    assertTrue(allItemPaginated.hasContent());
 	  }
 	  
+	  public int iterableSize(Iterable<Item> it){
+		  if (it instanceof Collection) {
+	            return ((Collection<?>) it).size();
+	        }
+	        int counter = 0;
+	        for (Object i : it) {
+	            counter++;
+	        }
+	        return counter;
+	  }
 	  
+		 public Date convertLocalDateToDate(LocalDate localDate) {
+			 return 	 Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+		 }
+		 
 	  //TODO remplacer par une BDD et liquibase ?
 	  private List<Item> createSomeItems() {
+		  Instant today = Instant.parse("2018-04-10T15:11:00.225Z");
+		  
 		  List<Item> items = new ArrayList<Item>();
 		  items.add(new Item("picture1.jpg","/some/local/folder/","First Picture",ItemType.PICTURE));
-		  items.add(new Item("picture2.jpg","/some/local/folder/","Second Picture",ItemType.PICTURE));
+		  items.add(new Item("picture2.png","/some/local/folder/","Second Picture",ItemType.PICTURE));
 		  items.add(new Item("codevideo1","http://youtube.com/some/path/", "Demo video 1",ItemType.VIDEO_YOUTUBE));
 		  items.add(new Item("picture3","/some/local/folder/",  "Third Picture",ItemType.PICTURE));
 		  items.add(new Item("codevideo2","http://youtube.com/some/path/", "Demo video 2",ItemType.VIDEO_YOUTUBE));
 		  items.add(new Item("codevideo3","http://youtube.com/some/path/", "Demo video 3",ItemType.VIDEO_YOUTUBE));
 		  items.add(new Item("picture4.jpg","/some/local/folder/", "Fourth Picture",ItemType.PICTURE));
-		  items.add(new Item("picture5.jpg","/some/local/folder/","Fifth Picture",ItemType.PICTURE));
+		  items.add(new Item("picture5.png","/some/local/folder/","Fifth Picture",ItemType.PICTURE));
 		  items.add(new Item("picture6.jpg","/some/local/folder/", "Sixth Picture",ItemType.PICTURE));
 		  items.add(new Item("codevideo4","http://youtube.com/some/path/", "Demo video 4",ItemType.VIDEO_YOUTUBE));
 		  items.add(new Item("picture7.jpg","/some/local/folder/", "Seventh Picture",ItemType.PICTURE));
 		  items.add(new Item("codevideo5","http://youtube.com/some/path/", "Demo video 5",ItemType.VIDEO_YOUTUBE));
+		  
+		  //Last Year
+		  items.get(0).setCreatedAt(Date.from(Instant.parse("2017-01-10T15:11:00.225Z")));
+		  items.get(1).setCreatedAt(Date.from(Instant.parse("2017-02-10T15:11:00.225Z")));
+		  items.get(2).setCreatedAt(Date.from(Instant.parse("2017-08-21T15:11:00.225Z")));
+		  items.get(3).setCreatedAt(Date.from(Instant.parse("2017-12-29T15:11:00.225Z")));
+		  //1janvier --> date fixe (2018-04-01)
+		  items.get(4).setCreatedAt(Date.from(Instant.parse("2018-01-25T15:11:00.225Z")));
+		  items.get(5).setCreatedAt(Date.from(Instant.parse("2018-02-10T15:11:00.225Z")));
+		  items.get(6).setCreatedAt(Date.from(Instant.parse("2018-03-10T15:11:00.225Z")));
+		  
+		  //date fixe (2018-04-01) today (2018-04-10)
+		  items.get(7).setCreatedAt(Date.from(Instant.parse("2018-04-01T15:11:00.225Z")));
+		  items.get(8).setCreatedAt(Date.from(Instant.parse("2018-04-02T15:11:00.225Z")));
+		  items.get(9).setCreatedAt(Date.from(Instant.parse("2018-04-03T15:11:00.225Z")));
+		  items.get(10).setCreatedAt(Date.from(Instant.parse("2018-04-04T15:11:00.225Z")));
+		  items.get(11).setCreatedAt(Date.from(Instant.parse("2018-04-05T15:11:00.225Z")));
 		  return items;
 	  }
+	  
+	  //toodo tri par date 
+	 
 }

@@ -1,6 +1,6 @@
 package com.gbcreation.wall.model;
 
-import java.time.Instant;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,7 +23,7 @@ import lombok.Setter;
 public class Item {
 	
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 	
 	@Column(nullable = false)
@@ -36,12 +36,12 @@ public class Item {
 	private String description;
 	
 	@Column(name = "date_creation", nullable = false, updatable = false)
-	//@Temporal(TemporalType.TIMESTAMP) -> java.util.Date
-	private Instant createdAt;
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date createdAt;
 	
 	@Column(name = "date_updaded")
-	//@Temporal(TemporalType.TIMESTAMP) --> -> java.util.Date
-	private Instant updatedAt;
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date updatedAt;
 	
 	private Float ratio;
 	
@@ -50,15 +50,13 @@ public class Item {
 	private Integer nbLike;
 	
 	private ItemType type;
-
+	
 	public Item(String file, String path, String description,ItemType type) {
 		super();
 		this.file = file;
 		this.path = path;
 		this.description = description;
 		this.type = type;
-		this.createdAt=Instant.now();
+		this.createdAt=new Date();
 	}
-	
-	
 }
