@@ -20,11 +20,14 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.gbcreation.wall.WallApplicationTests;
 import com.gbcreation.wall.model.Item;
-import com.gbcreation.wall.service.WallItem;
-import com.gbcreation.wall.service.WallService;
+import com.gbcreation.wall.model.ItemType;
+import com.gbcreation.wall.service.ItemService;
 
 
-//Appproche WebApppContextt (complète)
+//Revient a Intégration.....????
+//Sert à rien..........;
+
+//Approche WebApppContext (complète)
 //Charger le context Spring en entier
 //Crée nécessairement tous les beans et dépendances
 //Valide le java et la conf
@@ -39,7 +42,7 @@ public class WallControllerWebAppContextTest extends WallApplicationTests{
     private MockMvc mockMvc;
    
     @Mock
-    private WallService wallService;
+    private ItemService wallService;
 	  
 	private  List<Item> items;
 
@@ -51,18 +54,18 @@ public class WallControllerWebAppContextTest extends WallApplicationTests{
                 .build();
           
 		  items = new ArrayList<Item>();
-		  items.add(new Item("picture1.jpg","/some/local/folder/","First Picture"));
-		  items.add(new Item("picture2.jpg","/some/local/folder/","Second Picture"));
-		  items.add(new Item("codevideo1","http://youtube.com/some/path/", "Demo video 1"));
-		  items.add(new Item("picture3","/some/local/folder/",  "Third Picture"));
-		  items.add(new Item("codevideo2","http://youtube.com/some/path/", "Demo video 2"));
-		  items.add(new Item("codevideo3","http://youtube.com/some/path/", "Demo video 3"));
-		  items.add(new Item("picture4.jpg","/some/local/folder/", "Fourth Picture"));
-		  items.add(new Item("picture5.jpg","/some/local/folder/","Fifth Picture"));
-		  items.add(new Item("picture6.jpg","/some/local/folder/", "Sixth Picture"));
-		  items.add(new Item("codevideo4","http://youtube.com/some/path/", "Demo video 4"));
-		  items.add(new Item("picture7.jpg","/some/local/folder/", "Seventh Picture"));
-		  items.add(new Item("codevideo5","http://youtube.com/some/path/", "Demo video 5"));
+		  items.add(new Item("picture1.jpg","/some/local/folder/","First Picture",ItemType.PICTURE));
+		  items.add(new Item("picture2.jpg","/some/local/folder/","Second Picture",ItemType.PICTURE));
+		  items.add(new Item("codevideo1","http://youtube.com/some/path/", "Demo video 1",ItemType.VIDEO_YOUTUBE));
+		  items.add(new Item("picture3","/some/local/folder/",  "Third Picture",ItemType.PICTURE));
+		  items.add(new Item("codevideo2","http://youtube.com/some/path/", "Demo video 2",ItemType.VIDEO_YOUTUBE));
+		  items.add(new Item("codevideo3","http://youtube.com/some/path/", "Demo video 3",ItemType.VIDEO_YOUTUBE));
+		  items.add(new Item("picture4.jpg","/some/local/folder/", "Fourth Picture",ItemType.PICTURE));
+		  items.add(new Item("picture5.jpg","/some/local/folder/","Fifth Picture",ItemType.PICTURE));
+		  items.add(new Item("picture6.jpg","/some/local/folder/", "Sixth Picture",ItemType.PICTURE));
+		  items.add(new Item("codevideo4","http://youtube.com/some/path/", "Demo video 4",ItemType.VIDEO_YOUTUBE));
+		  items.add(new Item("picture7.jpg","/some/local/folder/", "Seventh Picture",ItemType.PICTURE));
+		  items.add(new Item("codevideo5","http://youtube.com/some/path/", "Demo video 5",ItemType.VIDEO_YOUTUBE));
 		  when(wallService.retrieveAllItems()).thenReturn(items);
     }
 	

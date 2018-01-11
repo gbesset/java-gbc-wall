@@ -1,7 +1,6 @@
 package com.gbcreation.wall.controller;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;

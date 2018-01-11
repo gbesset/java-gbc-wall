@@ -4,6 +4,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -49,6 +51,8 @@ public class Item {
 	
 	private Integer nbLike;
 	
+	@Column(name = "item_type")
+	@Enumerated(EnumType.STRING)
 	private ItemType type;
 	
 	public Item(String file, String path, String description,ItemType type) {
@@ -58,5 +62,6 @@ public class Item {
 		this.description = description;
 		this.type = type;
 		this.createdAt=new Date();
+		this.type=type.PICTURE;
 	}
 }
