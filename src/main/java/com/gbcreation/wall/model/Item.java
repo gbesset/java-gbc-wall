@@ -16,12 +16,14 @@ import javax.persistence.TemporalType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "gbc_wall_item")
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class Item {
 	
 	@Id
@@ -41,7 +43,7 @@ public class Item {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date createdAt;
 	
-	@Column(name = "date_updaded")
+	@Column(name = "date_updated")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date updatedAt;
 	
@@ -61,7 +63,7 @@ public class Item {
 		this.path = path;
 		this.description = description;
 		this.type = type;
-		this.createdAt=new Date();
-		this.type=type.PICTURE;
+		createdAt = new Date();
+		this.type=ItemType.PICTURE;
 	}
 }

@@ -82,6 +82,14 @@
 		    <artifactId>liquibase-core</artifactId>
 		    <scope>runtime</scope>
   		</dependency>
+  		
+  		
+  		  <!-- Spring Batch pour batch de migration sql version php -> generation sql nouvelle version -->
+  		 <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-batch</artifactId>
+        </dependency>
+        
   </dependencies>
   
   <build>
