@@ -131,22 +131,6 @@ public class BatchConfiguration {
     		return writer;
     }
     // end::readerwriterprocessor[]
-
-    private LineAggregator<SqlItem> createItemLineAggregator() {
-        DelimitedLineAggregator<SqlItem> lineAggregator = new DelimitedLineAggregator<>();
-        lineAggregator.setDelimiter(", ");
- 
-        FieldExtractor<SqlItem> fieldExtractor = createItemFieldExtractor();
-        lineAggregator.setFieldExtractor(fieldExtractor);
- 
-        return lineAggregator;
-    }
- 
-    private FieldExtractor<SqlItem> createItemFieldExtractor() {
-        BeanWrapperFieldExtractor<SqlItem> extractor = new BeanWrapperFieldExtractor<>();
-        extractor.setNames(new String[] {"id", "file", "path", "description"});
-        return extractor;
-    }
     
     // tag::jobstep[]
     @Bean

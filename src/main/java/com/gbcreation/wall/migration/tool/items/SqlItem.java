@@ -1,5 +1,6 @@
 package com.gbcreation.wall.migration.tool.items;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 import com.gbcreation.wall.model.Item;
@@ -27,7 +28,7 @@ public class SqlItem extends Item{
 			return "null";
 		}
 		else {
-			return "'"+field+"'";
+			return "'"+new Timestamp(field.getTime())+"'";
 		}
 	}
 }
