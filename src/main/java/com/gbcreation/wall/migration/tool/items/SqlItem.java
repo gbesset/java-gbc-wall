@@ -9,9 +9,6 @@ public class SqlItem extends Item{
 
 	@Override
 	public String toString() {
-		//Date a refaire. pas le bon format?
-		//batch off au démarage de wall?
-		
 		return new String (getId()+", "+sql(getFile())+", "+sql(getPath())+", "+sql(getDescription())+", "+sql(getCreatedAt())+", "+sql(getUpdatedAt())+", "+getRatio()+", "+getNbLike()+", "+sql(getType().name()));
 	}
 	

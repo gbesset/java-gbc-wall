@@ -32,7 +32,7 @@ public class ItemMigrationToolProcessor  implements ItemProcessor<MigrationSourc
 		log.debug("Source : id [{}] file [{}] description [{}] tags [{}]", source.getId(), source.getFile(), source.getDescription(), source.getTags());
 		log.debug("Source CLEAN: id [{}] file [{}] description [{}] tags [{}]", cleanData(source.getId()), cleanData(source.getFile()), cleanData(source.getDescription()), cleanData(source.getTags()));
 		
-		DateFormat formater = new SimpleDateFormat("YYY-MM-DD hh:mm:ss");
+		DateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		
 		SqlItem item = new SqlItem();
 		item.setId(new Long(cleanData(source.getId())));

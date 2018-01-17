@@ -1,24 +1,23 @@
 package com.gbcreation.wall.service;
 
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.assertj.core.util.Lists;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.gbcreation.wall.model.Item;
-import com.gbcreation.wall.model.ItemType;
+import com.gbcreation.wall.repository.ItemFilterSpecifications;
 import com.gbcreation.wall.repository.ItemRepository;
 import com.gbcreation.wall.util.WallUtils;
-import com.gbcreation.wall.repository.ItemFilterSpecifications;
 
 @Service
 public class ItemServiceImpl implements ItemService{
+	
+	@Value("${wall.item.page.size:15}")
+	private int pageNbItem;
 
 	@Resource
 	private ItemRepository itemRepository;
@@ -45,32 +44,32 @@ public class ItemServiceImpl implements ItemService{
 
 	@Override
 	public List<Item> findByFile(String file) {
-		return itemRepository.findByFile(file);
+		return itemRepository.findByFileOrderByCreatedAtDesc(file);
 	}
 
 	@Override
 	public List<Item> findByFileLike(String file) {
-		return itemRepository.findByFileContaining(file);
+		return itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc(file);
 	}
 	
 	@Override
 	public List<Item> findByDescriptionLike(String description) {
-		return itemRepository.findAll(ItemFilterSpecifications.descriptionLike(description));
+		return itemRepository.findAll(ItemFilterSpecifications.descriptionLike(description), new Sort(Sort.Direction.DESC,"createdAt"));
 	}
 	
 	@Override
 	public List<Item> retrieveAllItems() {
-		return WallUtils.convertIterableToList(itemRepository.findAll());
+		return WallUtils.convertIterableToList(itemRepository.findAll(new Sort(Sort.Direction.DESC,"createdAt")));
 	}
 
 	@Override
 	public List<Item> retrieveAllPictures() {
-		return WallUtils.convertIterableToList(itemRepository.findAll(ItemFilterSpecifications.isItemPicture()));
+		return WallUtils.convertIterableToList(itemRepository.findAll(ItemFilterSpecifications.isItemPicture(),new Sort(Sort.Direction.DESC,"createdAt")));
 	}
 
 	@Override
 	public List<Item> retrieveAllVideos() {
-		return WallUtils.convertIterableToList(itemRepository.findAll(ItemFilterSpecifications.isItemVideo()));
+		return WallUtils.convertIterableToList(itemRepository.findAll(ItemFilterSpecifications.isItemVideo(),new Sort(Sort.Direction.DESC,"createdAt")));
 	}
 
 	@Override
@@ -87,8 +86,15 @@ public class ItemServiceImpl implements ItemService{
 	public void deleteItem(Item i) {
 		itemRepository.delete(i);
 	}
-
-
-
+	@Override
+	public void updateItem(String id, Item item) {
+		//TODO.........; 
+		Long idItem = new Long(id);
+		if(itemRepository.exists(idItem)) {
+			Item foundItemm = itemRepository.findOne(idItem);
+			
+			itemRepository.save(item);
+		}
+	}
 	
 }

@@ -1,10 +1,8 @@
 package com.gbcreation.wall.service;
 
-import static org.hamcrest.CoreMatchers.any;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -18,11 +16,13 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.gbcreation.wall.model.Item;
@@ -77,14 +77,18 @@ public class ItemServiceTest {
 	    @Test
 	    public void test_count_pictures() {
 	    	
-		    	when(itemRepository.count()).thenReturn(12L);
-		    	when(itemRepository.count(Mockito.eq(ItemFilterSpecifications.isItemPicture()))).thenReturn(7L);
-		    	when(itemRepository.count(Mockito.eq(ItemFilterSpecifications.isItemVideo()))).thenReturn(5L);
+	    		given(itemRepository.count()).willReturn(12L);
+	    		given(itemRepository.count(Mockito.eq(ItemFilterSpecifications.isItemPicture()))).willReturn(7L);
+	    		given(itemRepository.count(Mockito.eq(ItemFilterSpecifications.isItemVideo()))).willReturn(5L);
+		    	
+		    	//when(itemRepository.count()).thenReturn(12L);
+		    	//when(itemRepository.count(Mockito.eq(ItemFilterSpecifications.isItemPicture()))).thenReturn(7L);
+		    	//when(itemRepository.count(Mockito.eq(ItemFilterSpecifications.isItemVideo()))).thenReturn(5L);
 		   
 		    	Long result = itemService.countPictures();
 	
 		    	//Pb static method.... a mocker ou ...?
-		    	fail("!! je n'arrive pas a mock les Specifications du repository.. (mes filtres isVideo, isPhoto, date)");
+		    	//fail("!! je n'arrive pas a mock les Specifications du repository.. (mes filtres isVideo, isPhoto, date)");
 		    	assertEquals(new Long(7),result);
 	
 		    	verify(itemRepository).count(ItemFilterSpecifications.isItemPicture());
@@ -124,13 +128,13 @@ public class ItemServiceTest {
 	    public void test_findBy_title() {
 	    		Item item = new Item("test-picture-001", "/some/local/path/", "this is a beautiful picture",ItemType.PICTURE);
 
-	    		when(itemRepository.findByFile("test-picture-001")).thenReturn(Arrays.asList(item));
+	    		when(itemRepository.findByFileOrderByCreatedAtDesc("test-picture-001")).thenReturn(Arrays.asList(item));
 		    	List<Item> result = itemService.findByFile("test-picture-001");
 	
 		    	assertEquals(1,result.size());
 		    	assertEquals(item,result.get(0));
 	
-		    	verify(itemRepository).findByFile("test-picture-001");
+		    	verify(itemRepository).findByFileOrderByCreatedAtDesc("test-picture-001");
 		    	verifyNoMoreInteractions(itemRepository);
 	    }
 	    
@@ -138,24 +142,24 @@ public class ItemServiceTest {
 	    public void test_findBy_title_like() {
 	    		Item item = new Item("test-picture-001", "/some/local/path/", "this is a beautiful picture",ItemType.PICTURE);
 
-	    		when(itemRepository.findByFileContaining("picture")).thenReturn(Arrays.asList(item));
+	    		when(itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("picture")).thenReturn(Arrays.asList(item));
 		    	List<Item> result = itemService.findByFileLike("picture");
 	
 		    	assertEquals(1,result.size());
 		    	assertEquals(item,result.get(0));
 	
-		    	verify(itemRepository).findByFileContaining("picture");
+		    	verify(itemRepository).findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("picture");
 		    	verifyNoMoreInteractions(itemRepository);
 	    }
 	    
 	    @Test
 	    public void test_findBy_title_like_noResults() {
-	    		when(itemRepository.findByFileContaining(Mockito.anyString())).thenReturn(new ArrayList<>());
+	    		when(itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc(Mockito.anyString())).thenReturn(new ArrayList<>());
 		    	List<Item> result = itemService.findByFileLike("picture");
 	
 		    	assertEquals(0,result.size());
 	
-		    	verify(itemRepository).findByFileContaining("picture");
+		    	verify(itemRepository).findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("picture");
 		    	verifyNoMoreInteractions(itemRepository);
 	    }
 	    
@@ -189,15 +193,17 @@ public class ItemServiceTest {
 	    
 	    @Test
 	    public void test_retrieve_all_items() {
-		    	when(itemRepository.findAll()).thenReturn(items);
-		    	when(itemRepository.findAll(ItemFilterSpecifications.isItemPicture())).thenReturn(itemsP);
-		    	when(itemRepository.findAll(ItemFilterSpecifications.isItemVideo())).thenReturn(itemsV);
+	    	 	ArgumentCaptor<Sort> sortArgument = ArgumentCaptor.forClass(Sort.class);
+	    	 
+		    	when(itemRepository.findAll(sortArgument.capture())).thenReturn(items);
+		    	when(itemRepository.findAll(ItemFilterSpecifications.isItemPicture(),sortArgument.capture())).thenReturn(itemsP);
+		    	when(itemRepository.findAll(ItemFilterSpecifications.isItemVideo(),sortArgument.capture())).thenReturn(itemsV);
 	    	
 		    	List<Item> result = itemService.retrieveAllItems();
 	
 		    	assertEquals(result.size(),items.size());
 	
-		    	verify(itemRepository).findAll();
+		    	verify(itemRepository).findAll(sortArgument.capture());
 		    	verifyNoMoreInteractions(itemRepository);
 	     }
 	    

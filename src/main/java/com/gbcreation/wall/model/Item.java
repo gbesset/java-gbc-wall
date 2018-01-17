@@ -64,6 +64,5 @@ public class Item {
 		this.description = description;
 		this.type = type;
 		createdAt = new Date();
-		this.type=ItemType.PICTURE;
 	}
 }

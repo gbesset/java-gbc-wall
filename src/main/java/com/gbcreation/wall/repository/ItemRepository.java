@@ -1,6 +1,5 @@
 package com.gbcreation.wall.repository;
 
-import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -14,19 +13,11 @@ import com.gbcreation.wall.model.Item;
 //This will be AUTO IMPLEMENTED by Spring into a Bean called itemRepository
 public interface ItemRepository extends PagingAndSortingRepository<Item,Long>, JpaSpecificationExecutor{
 	
-	List<Item> findByFile(String file);
-	List<Item> findByFileContaining(String file);
+	List<Item> findByFileOrderByCreatedAtDesc(String file);
+	List<Item> findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc(String file);
 	
 	//contains description <=> @Query("Select i from Item i where i.descriptio, like %:description%").
 	//List<Item> findByDescriptionContaining(String description);
-	
-	//a virer avec specifications
-	//List<Item> findByCreatedAtBetween(Instant begin, Instant end);
-	
-	
-	
-	
-	
 	
 	
 	//Pour info et voir rqt

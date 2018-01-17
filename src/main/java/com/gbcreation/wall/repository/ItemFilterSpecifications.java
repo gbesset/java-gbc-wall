@@ -45,7 +45,7 @@ public class ItemFilterSpecifications {
 		 return new Specification<Item>() {
 			 @Override
 			 public Predicate toPredicate(Root<Item> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
-				 return builder.like(root.get("description"), "%"+description+"%");
+				 return builder.like(builder.lower(root.get("description")), "%"+description.toLowerCase()+"%");
 			 }
 		 };
 	 }

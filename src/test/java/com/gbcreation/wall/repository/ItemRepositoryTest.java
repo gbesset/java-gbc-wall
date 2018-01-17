@@ -4,13 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalField;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -30,6 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.gbcreation.wall.model.Item;
 import com.gbcreation.wall.model.ItemType;
+import com.gbcreation.wall.util.WallUtils;
 
 
 
@@ -69,12 +66,16 @@ public class ItemRepositoryTest {
 	    //Assert Find One and All
 	  	assertEquals(itemSaved, itemRepository.findOne(itemSaved.getId()));
 	  	
-	  	Item itemSaved2 = itemRepository.save(new Item("codevideo1","http://youtube.com/some/path/", "Demo video 1",ItemType.VIDEO_YOUTUBE));
+	  	Item itemSaved2 = itemRepository.save(new Item("codevideo1","http://youtube.com/some/path/", "Demo video 1", ItemType.VIDEO_YOUTUBE));
 	  	assertEquals(2, itemRepository.count());
 	  	
 	  	for(Item it : itemRepository.findAll()){
-	  		Item t = (it.getType()==ItemType.PICTURE) ? itemSaved : itemSaved2;
-	  		assertEquals(t.getId(),it.getId());
+	  		if(ItemType.PICTURE.equals(it.getType())){
+	  			assertEquals(it, itemSaved);
+	  		}
+	  		else {
+	  			assertEquals(it, itemSaved2);
+	  		}
 	  	}
 	  	
 	  	//Assert Update
@@ -112,41 +113,63 @@ public class ItemRepositoryTest {
 			 itemRepository.save(it);
 		 }
 
-		 List<Item> results = itemRepository.findByFile("codevideo2");
+		 List<Item> results = itemRepository.findByFileOrderByCreatedAtDesc("codevideo2");
 		 assertEquals("codevideo2", results.get(0).getFile());
 		 
-		 results = itemRepository.findByFileContaining("codev");
+		 results = itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("codev");
 		 assertEquals(5, results.size());
-		 assertEquals("codevideo1", results.get(0).getFile());
-		 assertEquals("codevideo5", results.get(4).getFile());
+		 assertEquals("codevideo5", results.get(0).getFile());
+		 assertEquals("codevideo4", results.get(1).getFile());
+		 assertEquals("codevideo1", results.get(4).getFile());
 		 
-		 results = itemRepository.findByFileContaining(".png");
+		 results = itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("cODev");
+		 assertEquals(5, results.size());
+		 assertEquals("codevideo5", results.get(0).getFile());
+		 assertEquals("codevideo4", results.get(1).getFile());
+		 assertEquals("codevideo1", results.get(4).getFile());
+		 
+		 results = itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc(".png");
 		 assertEquals(2, results.size());
-		 assertEquals("picture2.png", results.get(0).getFile());
-		 assertEquals("picture5.png", results.get(1).getFile());
+		 assertEquals("picture5.png", results.get(0).getFile());
+		 assertEquals("picture2.png", results.get(1).getFile());
 		 
 		 results = itemRepository.findByFileMyRqt("codevideo2");
 		 assertEquals("codevideo2", results.get(0).getFile());
 	 }
 	 
 	 @Test
-	  public void test_filtering_on_description() {
+	  public void test_filtering_on_description_field_and_fieldIgnoreCase() {
 		 for(Item it : createSomeItems()) {
 			 itemRepository.save(it);
 		 }
 		 
 		 List<Item> results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("Fourth Picture"));
-		 assertEquals("picture4.jpg", results.get(0).getFile());
+		 assertEquals("Fourth Picture", results.get(0).getDescription());
+		 
+		 results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("fOurTH pictuRe"));
+		 assertEquals("Fourth Picture", results.get(0).getDescription());
 		 
 		 results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("Seventh"));
-		 assertEquals("picture7.jpg", results.get(0).getFile());
+		 assertEquals("Seventh Picture", results.get(0).getDescription());
+		 
+		 results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("sevEnth"));
+		 assertEquals("Seventh Picture", results.get(0).getDescription());
 		 
 		 results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("Picture"));
 		 assertEquals(7, results.size());
 		 
+		 results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("picTUre"));
+		 assertEquals(7, results.size());
+		 
 		 results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("th"));
-		 assertEquals(4, results.size());
-		 assertEquals("picture4.jpg", results.get(0).getFile());
+		 assertEquals(5, results.size());
+		 assertEquals("Third Picture", results.get(0).getDescription());
+		 assertEquals("Fourth Picture", results.get(1).getDescription());
+		 
+		 results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("TH"));
+		 assertEquals(5, results.size());
+		 assertEquals("Third Picture", results.get(0).getDescription());
+		 assertEquals("Fourth Picture", results.get(1).getDescription());
 		 
 	  }
 	 
@@ -191,6 +214,38 @@ public class ItemRepositoryTest {
 		 fail("not yet implemented");
 	  }
 	 
+	 @Test
+	  public void test_find_items_order_by_creation_date() {
+		 for(Item it : createSomeItems()) {
+			 itemRepository.save(it);
+		 }
+		 
+		 List<Item> results = itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("e");
+		 assertEquals(12, results.size());
+		 assertEquals("2018-04-05T15:11:00.225Z", Instant.ofEpochMilli(results.get(0).getCreatedAt().getTime()).toString());
+		 assertEquals("2017-01-10T15:11:00.225Z", Instant.ofEpochMilli(results.get(11).getCreatedAt().getTime()).toString());
+		 
+		 results = WallUtils.convertIterableToList(itemRepository.findAll(new Sort(Sort.Direction.DESC,"createdAt")));
+		 assertEquals(12, results.size());
+		 assertEquals("2018-04-05T15:11:00.225Z", Instant.ofEpochMilli(results.get(0).getCreatedAt().getTime()).toString());
+		 assertEquals("2018-04-04T15:11:00.225Z", Instant.ofEpochMilli(results.get(1).getCreatedAt().getTime()).toString());
+		 assertEquals("2017-02-10T15:11:00.225Z", Instant.ofEpochMilli(results.get(10).getCreatedAt().getTime()).toString());
+		 assertEquals("2017-01-10T15:11:00.225Z", Instant.ofEpochMilli(results.get(11).getCreatedAt().getTime()).toString());
+		 
+	  }
+	 
+	 @Test
+	  public void test_limmit_100_item_max() {
+		 for(int i=0; i<=200;i++) {
+			Item it = new Item("file-"+i, "/some/path/"+i, "d-"+i, ItemType.PICTURE);
+			itemRepository.save(it);
+		 }
+		 List<Item> results = itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("file");
+		 assertEquals(100, results.size());
+		 assertEquals("file-200", results.get(0).getFile());
+		 assertEquals("file-101", results.get(99).getFile());
+		 
+	  }
 	 
 	  @Test
 	  public void test_paginate() {

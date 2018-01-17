@@ -30,8 +30,8 @@ import com.gbcreation.wall.migration.tool.items.SqlComment;
 import com.gbcreation.wall.migration.tool.items.SqlItem;
 
 
-@Configuration
-@EnableBatchProcessing
+//@Configuration
+//@EnableBatchProcessing
 public class BatchConfiguration {
 	
 	private static String EOF = System.getProperty("line.separator");

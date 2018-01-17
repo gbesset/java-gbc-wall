@@ -62,14 +62,14 @@ public class WallControllerIntegrationTest {
 	public void test_retrieve_all_items_OK() throws Exception {
 
 		mockMvc.perform(get(PATH + "/all"))
-		.andDo(print())
-		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
-		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$[*]").isArray())
-		.andExpect(jsonPath("$[*]", hasSize(28)))
-		.andExpect(jsonPath("$[0].file").value("!!!!!"))
-		.andExpect(jsonPath("$[27].file").value("!!!!!!!"))
+			.andDo(print())
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$[*]").isArray())
+			.andExpect(jsonPath("$[*]", hasSize(28)))
+			.andExpect(jsonPath("$[0].file").value("bender-futurama-robot-p-753df5.jpg"))
+			.andExpect(jsonPath("$[27].file").value("big3-1cd860.gif"))
 		;
 	}
 	 
@@ -83,8 +83,8 @@ public class WallControllerIntegrationTest {
 	        		.andExpect(status().isOk())
 	        		.andExpect(jsonPath("$[*]").isArray())
 	        	    .andExpect(jsonPath("$[*]", hasSize(26)))
-	        	    .andExpect(jsonPath("$[0].file").value("!!!!!!.jpg"))
-	        	    .andExpect(jsonPath("$[25].file").value("!!!!!!.jpg"))
+	        		.andExpect(jsonPath("$[0].file").value("bender-futurama-robot-p-753df5.jpg"))
+	        		.andExpect(jsonPath("$[25].file").value("big3-1cd860.gif"))
 	        		;
 	    }
 	 
@@ -97,40 +97,121 @@ public class WallControllerIntegrationTest {
 	        		.andExpect(status().isOk())
 	        		.andExpect(jsonPath("$[*]").isArray())
 	        	    .andExpect(jsonPath("$[*]", hasSize(2)))
-	        	    .andExpect(jsonPath("$[0].file").value("!!!!!"))
-	        	    .andExpect(jsonPath("$[1].file").value("!!!!!"))
+	        	    .andExpect(jsonPath("$[0].file").value("http://player.vimeo.com/video/12915013"))
+	        	    .andExpect(jsonPath("$[1].file").value("http://www.youtube.com/embed/GLpO-OvJU74"))
 	        		;
 	    }
 	 @Test
 	    public void test_search_title() throws Exception {
 	    		
-	        mockMvc.perform(get(PATH+"/search/title/!!!!!"))
+	        mockMvc.perform(get(PATH+"/search/title/ipod"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 	        		.andExpect(status().isOk())
 	        		.andExpect(jsonPath("$[*]").isArray())
-	        		.andExpect(jsonPath("$[*]", hasSize(12)))
-	        		.andExpect(jsonPath("$[0].file").value("!!!!!!!.jpg"))
-	        		.andExpect(jsonPath("$[11].file").value("!!!!!!!"))
+	        		.andExpect(jsonPath("$[*]", hasSize(1)))
+	        		.andExpect(jsonPath("$[0].file").value("Futurama-iPod-1024x768-05f116.jpg"))
+	        		;
+	        
+	        mockMvc.perform(get(PATH+"/search/title/IPOD"))
+		    		.andDo(print())
+		    		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+		    		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+		    		.andExpect(status().isOk())
+		    		.andExpect(jsonPath("$[*]").isArray())
+		    		.andExpect(jsonPath("$[*]", hasSize(1)))
+		    		.andExpect(jsonPath("$[0].file").value("Futurama-iPod-1024x768-05f116.jpg"))
+		    		;
+	        
+        		mockMvc.perform(get(PATH+"/search/title/simpsons"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+	        		.andExpect(jsonPath("$[*]").isArray())
+	        		.andExpect(jsonPath("$[*]", hasSize(2)))
+	        		.andExpect(jsonPath("$[0].file").value("SIMPSONS-FUTURAMA-612x381-d8f865.jpg"))
+	        		.andExpect(jsonPath("$[1].file").value("the-simpsons-futurama-crossover-9de538.jpg"))
+	        		;
+	        		
+        		mockMvc.perform(get(PATH+"/search/title/bender"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+	        		.andExpect(jsonPath("$[*]").isArray())
+	        		.andExpect(jsonPath("$[*]", hasSize(5)))
+	        		.andExpect(jsonPath("$[0].file").value("bender-futurama-robot-p-753df5.jpg"))
+	        		.andExpect(jsonPath("$[1].file").value("air-bender-617cca.jpg"))
+	        		.andExpect(jsonPath("$[2].file").value("bender-futurama-poker-4d8463.jpg"))
+	        		.andExpect(jsonPath("$[3].file").value("futurama-bender2-b0b52e.jpg"))
+	        		.andExpect(jsonPath("$[4].file").value("254638-bender-fry-leela-futurama-futurama-p-6fb68e.jpg"))
 	        		;
 	    }
+	 @Test
+	    public void test_search_title_noResults() throws Exception {
+	    		
+	        mockMvc.perform(get(PATH+"/search/title/hdsf12ff"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+	        		.andExpect(content().string("[]"))
+	        		;
+	 }
 	 @Test
 	    public void test_search_description() throws Exception {
  		
-	        mockMvc.perform(get(PATH+"/search/description/!!!!!"))
+	        mockMvc.perform(get(PATH+"/search/description/bender"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
-	        		 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 	        		.andExpect(status().isOk())
 	        		.andExpect(jsonPath("$[*]").isArray())
-	        		.andExpect(jsonPath("$[*]", hasSize(12)))
-	        		.andExpect(jsonPath("$[0].file").value("!!!!!!.jpg"))
-	        		.andExpect(jsonPath("$[11].file").value("!!!!!"))
+	        		.andExpect(jsonPath("$[*]", hasSize(4)))
+	        		.andExpect(jsonPath("$[0].description").value("bender"))
+	        		.andExpect(jsonPath("$[1].description").value("Air bender"))
+	        		.andExpect(jsonPath("$[2].description").value("Bender switch off"))
+	        		.andExpect(jsonPath("$[3].description").value("bender cartoon"))
 	        		;
 	        
+	        mockMvc.perform(get(PATH+"/search/description/bender"))
+		        .andDo(print())
+		        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+		        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+		        .andExpect(status().isOk())
+		        .andExpect(jsonPath("$[*]").isArray())
+		        .andExpect(jsonPath("$[*]", hasSize(4)))
+		        .andExpect(jsonPath("$[0].description").value("bender"))
+		        .andExpect(jsonPath("$[1].description").value("Air bender"))
+		        .andExpect(jsonPath("$[2].description").value("Bender switch off"))
+		        .andExpect(jsonPath("$[3].description").value("bender cartoon"))
+		        ;
+	        
+	        mockMvc.perform(get(PATH+"/search/description/ipod"))
+		        .andDo(print())
+		        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+		        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+		        .andExpect(status().isOk())
+		        .andExpect(jsonPath("$[*]").isArray())
+		        .andExpect(jsonPath("$[*]", hasSize(1)))
+		        .andExpect(jsonPath("$[0].description").value("Ipod, style"))
+	        ;
+	        
+	        mockMvc.perform(get(PATH+"/search/description/affiche"))
+		        .andDo(print())
+		        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+		        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+		        .andExpect(status().isOk())
+		        .andExpect(jsonPath("$[*]").isArray())
+		        .andExpect(jsonPath("$[*]", hasSize(2)))
+		        .andExpect(jsonPath("$[0].description").value("Encore une affiche"))
+		        .andExpect(jsonPath("$[1].description").value("Affiche"))
+	        ;
 	    }
-	 @Test
+
+	 	@Test
 	    public void test_search_description_noResults() throws Exception {
 	    		
 	        mockMvc.perform(get(PATH+"/search/description/a@&fg!fterh"))
@@ -140,6 +221,5 @@ public class WallControllerIntegrationTest {
 	        		.andExpect(status().isOk())
 	        		.andExpect(content().string("[]"))
 	        		;
-	        
 	    }
 }
