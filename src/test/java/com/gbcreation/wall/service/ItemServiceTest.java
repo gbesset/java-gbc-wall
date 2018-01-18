@@ -2,7 +2,9 @@ package com.gbcreation.wall.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -18,24 +20,32 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.PowerMockRunnerDelegate;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.gbcreation.wall.model.Item;
 import com.gbcreation.wall.model.ItemType;
 import com.gbcreation.wall.repository.ItemFilterSpecifications;
 import com.gbcreation.wall.repository.ItemRepository;
 
-@RunWith(SpringRunner.class)
+@RunWith(PowerMockRunner.class)
+@PowerMockRunnerDelegate(SpringJUnit4ClassRunner.class)
+@PrepareForTest( ItemFilterSpecifications.class)
 public class ItemServiceTest {
 
-	 @TestConfiguration
+	 	@TestConfiguration
 	    static class ItemServiceTestContextConfiguration {
-	  
 	        @Bean
 	        public ItemService itemService() {
 	            return new ItemServiceImpl();
@@ -77,37 +87,46 @@ public class ItemServiceTest {
 	    @Test
 	    public void test_count_pictures() {
 	    	
-	    		given(itemRepository.count()).willReturn(12L);
-	    		given(itemRepository.count(Mockito.eq(ItemFilterSpecifications.isItemPicture()))).willReturn(7L);
-	    		given(itemRepository.count(Mockito.eq(ItemFilterSpecifications.isItemVideo()))).willReturn(5L);
-		    	
-		    	//when(itemRepository.count()).thenReturn(12L);
-		    	//when(itemRepository.count(Mockito.eq(ItemFilterSpecifications.isItemPicture()))).thenReturn(7L);
-		    	//when(itemRepository.count(Mockito.eq(ItemFilterSpecifications.isItemVideo()))).thenReturn(5L);
+	    		// Methodes static -> powerMockito
+	    		Specification<Item> specPicture = ItemFilterSpecifications.isItemPicture();
+			Specification<Item> specVideo = ItemFilterSpecifications.isItemVideo();	
+			PowerMockito.mockStatic(ItemFilterSpecifications.class);
+			PowerMockito.when(ItemFilterSpecifications.isItemPicture()).thenReturn(specPicture);
+			PowerMockito.when(ItemFilterSpecifications.isItemVideo()).thenReturn(specVideo);
+		
+	     	when(itemRepository.count()).thenReturn(12L);
+	     	when(itemRepository.count(Mockito.eq(specPicture))).thenReturn(7L);
+	     	when(itemRepository.count(Mockito.eq(specVideo))).thenReturn(5L);
 		   
 		    	Long result = itemService.countPictures();
 	
-		    	//Pb static method.... a mocker ou ...?
-		    	//fail("!! je n'arrive pas a mock les Specifications du repository.. (mes filtres isVideo, isPhoto, date)");
 		    	assertEquals(new Long(7),result);
 	
-		    	verify(itemRepository).count(ItemFilterSpecifications.isItemPicture());
+		    	verify(itemRepository).count(Mockito.eq(specPicture));
 		    	verifyNoMoreInteractions(itemRepository);
 	    }
 	    
 	    @Test
 	    public void test_count_videos() {
+	    	
+	    		// Methodes static -> powerMockito
+			Specification<Item> specPicture = ItemFilterSpecifications.isItemPicture();
+			Specification<Item> specVideo = ItemFilterSpecifications.isItemVideo();	
+			
+			PowerMockito.mockStatic(ItemFilterSpecifications.class);
+			PowerMockito.when(ItemFilterSpecifications.isItemPicture()).thenReturn(specPicture);
+			PowerMockito.when(ItemFilterSpecifications.isItemVideo()).thenReturn(specVideo);
+		
 	     	when(itemRepository.count()).thenReturn(12L);
-	     	when(itemRepository.count(ItemFilterSpecifications.isItemPicture())).thenReturn(7L);
-	     	when(itemRepository.count(Mockito.eq(ItemFilterSpecifications.isItemVideo()))).thenReturn(5L);
+	     	when(itemRepository.count(Mockito.eq(specPicture))).thenReturn(7L);
+	     	when(itemRepository.count(Mockito.eq(specVideo))).thenReturn(5L);
 	     	
 	     	
 	     	Long result = itemService.countVideos();
 
-	     	fail("!! je n'arrive pas a mock les Specifications du repository.. (mes filtres isVideo, isPhoto, date)");
 	     	assertEquals(new Long(5),result);
 	     	
-	     	verify(itemRepository).count(ItemFilterSpecifications.isItemVideo());
+	     	verify(itemRepository).count(Mockito.eq(specVideo));
 	     	verifyNoMoreInteractions(itemRepository);
 	    }
 	    
@@ -167,27 +186,25 @@ public class ItemServiceTest {
 	    public void test_findBy_description_like() {
 	    		Item item = new Item("test-picture-001", "/some/local/path/", "this is a beautiful picture",ItemType.PICTURE);
 
-	    		when(itemRepository.findAll(ItemFilterSpecifications.descriptionLike("beautiful"))).thenReturn(Arrays.asList(item));
+	    		when(itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("beautiful")).thenReturn(Arrays.asList(item));
 		    	List<Item> result = itemService.findByFileLike("beautiful");
 	
-		    	fail("!! je n'arrive pas a mock les Specifications du repository.. (mes filtres isVideo, isPhoto, date)");
 		    	assertEquals(1,result.size());
 		    	assertEquals(item,result.get(0));
 	
-		    	verify(itemRepository).findAll(ItemFilterSpecifications.descriptionLike("beautiful"));
+		    	verify(itemRepository, times(1)).findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("beautiful");
 		    	verifyNoMoreInteractions(itemRepository);
 	    }
 	    
 	    @Test
 	    public void test_findBy_description_like_noResults() {
 
-	    		when(itemRepository.findAll(ItemFilterSpecifications.descriptionLike("beautiful"))).thenReturn(new ArrayList<>());
+	    		when(itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("beautiful")).thenReturn(new ArrayList<>());
 		    	
 	    		List<Item> result = itemService.findByFileLike("beautiful");
 	
 		    	assertEquals(0,result.size());
-		    	fail("!! je n'arrive pas a mock les Specifications du repository.. (mes filtres isVideo, isPhoto, date)");
-		    	verify(itemRepository).findAll(ItemFilterSpecifications.descriptionLike("beautiful"));
+		    	verify(itemRepository, times(1)).findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("beautiful");
 		    	verifyNoMoreInteractions(itemRepository);
 	    }
 	    
@@ -195,9 +212,9 @@ public class ItemServiceTest {
 	    public void test_retrieve_all_items() {
 	    	 	ArgumentCaptor<Sort> sortArgument = ArgumentCaptor.forClass(Sort.class);
 	    	 
-		    	when(itemRepository.findAll(sortArgument.capture())).thenReturn(items);
-		    	when(itemRepository.findAll(ItemFilterSpecifications.isItemPicture(),sortArgument.capture())).thenReturn(itemsP);
-		    	when(itemRepository.findAll(ItemFilterSpecifications.isItemVideo(),sortArgument.capture())).thenReturn(itemsV);
+		    	when(itemRepository.findAll(any(Sort.class))).thenReturn(items);
+		    	when(itemRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(itemsP);
+		    	when(itemRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(itemsV);
 	    	
 		    	List<Item> result = itemService.retrieveAllItems();
 	
@@ -209,37 +226,54 @@ public class ItemServiceTest {
 	    
 	    @Test
 	    public void test_retrieve_all_pictures() {
-	    		when(itemRepository.findAll()).thenReturn(items);
-		    	when(itemRepository.findAll(ItemFilterSpecifications.isItemPicture())).thenReturn(itemsP);
-		    	when(itemRepository.findAll(ItemFilterSpecifications.isItemVideo())).thenReturn(itemsV);
+
+	    		// Methodes static -> powerMockito
+    			Specification<Item> specPicture = ItemFilterSpecifications.isItemPicture();
+    			Specification<Item> specVideo = ItemFilterSpecifications.isItemVideo();	
+    			
+    			PowerMockito.mockStatic(ItemFilterSpecifications.class);
+    			PowerMockito.when(ItemFilterSpecifications.isItemPicture()).thenReturn(specPicture);
+    			PowerMockito.when(ItemFilterSpecifications.isItemVideo()).thenReturn(specVideo);
+			
+		    	when(itemRepository.findAll(any(Sort.class))).thenReturn(items);
+		    	when(itemRepository.findAll(Mockito.eq(specPicture), any(Sort.class))).thenReturn(itemsP);
+		    	when(itemRepository.findAll(Mockito.eq(specVideo), any(Sort.class))).thenReturn(itemsV);
 		    	
 		    	List<Item> result = itemService.retrieveAllPictures();
-	
-		    	fail("!! je n'arrive pas a mock les Specifications du repository.. (mes filtres isVideo, isPhoto, date)");
 		    	assertEquals(result.size(),7);
 		    	assertEquals(result.size(),itemsP.size());
 		    	assertEquals(result.get(0).getType(),ItemType.PICTURE);
-	
-		    	verify(itemRepository).findAll();
+
+		    	verify(itemRepository).findAll(Mockito.eq(specPicture),any(Sort.class));
+		    
+		    	//erreur bizarre...?
+		    	//PowerMockito.verifyStatic();
 		    	verifyNoMoreInteractions(itemRepository);
 	     }
 	    
 	    @Test
 	    public void test_retrieve_all_videos() {
-		    	when(itemRepository.findAll()).thenReturn(items);
-		    	when(itemRepository.findAll(ItemFilterSpecifications.isItemPicture())).thenReturn(itemsP);
-		    	when(itemRepository.findAll(ItemFilterSpecifications.isItemVideo())).thenReturn(itemsV);
+	    	// Methodes static -> powerMockito
+			Specification<Item> specPicture = ItemFilterSpecifications.isItemPicture();
+			Specification<Item> specVideo = ItemFilterSpecifications.isItemVideo();	
+			
+			PowerMockito.mockStatic(ItemFilterSpecifications.class);
+			PowerMockito.when(ItemFilterSpecifications.isItemPicture()).thenReturn(specPicture);
+			PowerMockito.when(ItemFilterSpecifications.isItemVideo()).thenReturn(specVideo);
+		
+		    	when(itemRepository.findAll(any(Sort.class))).thenReturn(items);
+		    	when(itemRepository.findAll(Mockito.eq(specPicture), any(Sort.class))).thenReturn(itemsP);
+		    	when(itemRepository.findAll(Mockito.eq(specVideo), any(Sort.class))).thenReturn(itemsV);
 	    	
 		    	List<Item> result = itemService.retrieveAllVideos();
 	
-		    	fail("!! je n'arrive pas a mock les Specifications du repository.. (mes filtres isVideo, isPhoto, date)");
 		    	assertEquals(result.size(),5);
 		    assertEquals(result.size(),itemsV.size());
 		    	assertEquals(result.get(0).getType(),ItemType.VIDEO);
 		    	assertEquals(result.get(1).getType(),ItemType.VIDEO_YOUTUBE);
 		    	assertEquals(result.get(2).getType(),ItemType.VIDEO_VIMEO);
 	
-		    	verify(itemRepository).findAll();
+		    	verify(itemRepository).findAll(Mockito.eq(specVideo),any(Sort.class));
 		    	verifyNoMoreInteractions(itemRepository);
 	     }
 	    
