@@ -23,8 +23,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.gbcreation.wall.model.Comment;
 import com.gbcreation.wall.model.Item;
 import com.gbcreation.wall.model.ItemType;
+import com.gbcreation.wall.service.CommentService;
 import com.gbcreation.wall.service.ItemService;
 
 
@@ -38,16 +40,21 @@ public class WallControllerUnitTest {
 	@MockBean
 	private ItemService itemServiceMock;
 
+	@MockBean
+	private CommentService commentServiceMock;
+	
 	private static String PATH = "/api/wall";
 	
 	private  List<Item> items;
-	 
+	
+	private  List<Comment> comments;
 	  
 	@Test
 	public void test_count() throws Exception {
 		when(itemServiceMock.countAll()).thenReturn(12L);
 		when(itemServiceMock.countPictures()).thenReturn(7L);
 		when(itemServiceMock.countVideos()).thenReturn(5L);
+		when(commentServiceMock.countAll()).thenReturn(15L);
 
 		mockMvc.perform(get(PATH+"/count"))
 		.andDo(print())
@@ -57,11 +64,13 @@ public class WallControllerUnitTest {
 		.andExpect(jsonPath("$.count-all").value(12))
 		.andExpect(jsonPath("$.count-pictures").value(7))
 		.andExpect(jsonPath("$.count-videos").value(5))
+		.andExpect(jsonPath("$.count-comments").value(15))
 		;
 		
 		verify(itemServiceMock).countAll();
 		verify(itemServiceMock).countPictures();
 		verify(itemServiceMock).countVideos();
+		verify(commentServiceMock).countAll();
 		verifyNoMoreInteractions(itemServiceMock);
 	}
 	
@@ -273,6 +282,75 @@ public class WallControllerUnitTest {
 	        verifyNoMoreInteractions(itemServiceMock);
 	    }
 	    
+	    @Test
+	    public void test_search_comments() throws Exception {
+	    	generateItems(null);
+	    	when(commentServiceMock.findByCommentLike(Mockito.eq("a description"))).thenReturn(generateComments());
+    		
+	        mockMvc.perform(get(PATH+"/search/comment/a description"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+	        		.andExpect(jsonPath("$[*]").isArray())
+	        		.andExpect(jsonPath("$[*]", hasSize(12)))
+	        		.andExpect(jsonPath("$[0].comment").value("nice picture1"))
+	        		.andExpect(jsonPath("$[11].comment").value("ah ok, it's south africa"))
+	        		;
+	        
+	        verify(commentServiceMock).findByCommentLike("a description");
+	        verifyNoMoreInteractions(commentServiceMock);
+	    }
+	    
+	    @Test
+	    public void test_search_comments_noResults() throws Exception {
+	    		
+	        mockMvc.perform(get(PATH+"/search/comment/another one"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+	        		.andExpect(content().string("[]"))
+	        		;
+	        
+	        verify(commentServiceMock).findByCommentLike("another one");
+	        verifyNoMoreInteractions(commentServiceMock);
+	    }
+	    
+	    @Test
+	    public void test_search_authors() throws Exception {
+	    	generateItems(null);
+	    	when(commentServiceMock.findByAuthorLike(Mockito.eq("a description"))).thenReturn(generateComments());
+    		
+	        mockMvc.perform(get(PATH+"/search/author/an author"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+	        		.andExpect(jsonPath("$[*]").isArray())
+	        		.andExpect(jsonPath("$[*]", hasSize(12)))
+	        		.andExpect(jsonPath("$[0].author").value("John Doe"))
+	        		.andExpect(jsonPath("$[11].author").value("Guy Mann"))
+	        		;
+	        
+	        verify(commentServiceMock).findByAuthorLike("an author");
+	        verifyNoMoreInteractions(commentServiceMock);
+	    }
+	    
+	    @Test
+	    public void test_search_author_noResults() throws Exception {
+	    		
+	        mockMvc.perform(get(PATH+"/search/author/another one"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+	        		.andExpect(content().string("[]"))
+	        		;
+	        
+	        verify(commentServiceMock).findByAuthorLike("another one");
+	        verifyNoMoreInteractions(commentServiceMock);
+	    }
 	    
 	    @Test
 	    public void testRetrieveAllError() throws Exception{
@@ -315,6 +393,26 @@ public class WallControllerUnitTest {
 		    		items.add(new Item("codevideo5","http://youtube.com/some/path/", "Demo video 5",ItemType.VIDEO_YOUTUBE));
 		    	}
 		    	return items;
-    }
+	    }
+	    
+	    private List<Comment> generateComments() {
+			comments = new ArrayList<Comment>();
+			comments.add(new Comment("John Doe", "nice picture1", items.get(0)));
+			comments.add(new Comment("Jane Doe", "it's true, ont of your best", items.get(0)));
+			comments.add(new Comment("Theodore Handle", "wow", items.get(0)));
+			
+			comments.add(new Comment("Guy Mann", "nice video2", items.get(4)));
+			comments.add(new Comment("Eleanor Fant Mann", "a bit long maybe", items.get(4)));
+			comments.add(new Comment("Guy Mann", "not agreed", items.get(4)));
+			
+			comments.add(new Comment("John Doe", "nice picture4", items.get(6)));
+			comments.add(new Comment("Jane Doe", "where is it", items.get(6)));
+			comments.add(new Comment("Theodore Handle", "australia maybee", items.get(6)));
+			comments.add(new Comment("Guy Mann", "NZ i guess", items.get(6)));
+			comments.add(new Comment("Eleanor Fant Mann", "no idea, so beautiful. wow", items.get(6)));
+			comments.add(new Comment("Guy Mann", "ah ok, it's south africa", items.get(6)));
+			
+			return comments;
+		}
 	    
 }

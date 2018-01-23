@@ -30,6 +30,7 @@ import com.gbcreation.wall.migration.tool.items.SqlComment;
 import com.gbcreation.wall.migration.tool.items.SqlItem;
 
 
+//Commenter ces 2 annotations pour ne pas lancer au démarage......
 //@Configuration
 //@EnableBatchProcessing
 public class BatchConfiguration {
@@ -37,8 +38,8 @@ public class BatchConfiguration {
 	private static String EOF = System.getProperty("line.separator");
 	private static String pathSource = "migrationTool/";
 	private static String pathDestination = "migrationTool/migrated/";
-	private static String fileName = "_demo.sql";
-	//private static String fileName = "_prod.sql";
+	//private static String fileName = "_demo.sql";
+	private static String fileName = "_prod.sql";
 	
 	@Autowired
     public JobBuilderFactory jobBuilderFactory;
@@ -71,8 +72,8 @@ public class BatchConfiguration {
         reader.setResource(new ClassPathResource(pathSource + "comment" + fileName));
         
         reader.setLineMapper(new DefaultLineMapper<MigrationSourceComment>() {{
-	        	setLineTokenizer(new DelimitedLineTokenizer(", ") {{
-	        		setNames(new String[] { "TODO" });
+	        	setLineTokenizer(new DelimitedLineTokenizer("', '") {{
+	        		setNames(new String[] { "id-itemId-author", "comment-isApproved-creationDate", "update-eof" });
 	        	}});
 	        	setFieldSetMapper(new BeanWrapperFieldSetMapper<MigrationSourceComment>() {{
 	        		setTargetType(MigrationSourceComment.class);
@@ -138,8 +139,9 @@ public class BatchConfiguration {
         return jobBuilderFactory.get("Migrate SQL v1 to V2")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(step1())
+                //.flow(step1())
                // .next(step2())
+                .flow(step2())
                 .end()
                 .build();
     }

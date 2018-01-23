@@ -17,7 +17,7 @@ public class ItemHeaderFooterCallBack implements FlatFileHeaderCallback, FlatFil
     
    @Override
    public void writeHeader(Writer writer) throws IOException {
-       writer.write(OUTPUT_HEADER );      
+       writer.write(OUTPUT_HEADER);      
    }
 
    @Override

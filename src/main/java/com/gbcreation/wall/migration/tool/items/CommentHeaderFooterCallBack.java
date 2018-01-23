@@ -10,12 +10,14 @@ public class CommentHeaderFooterCallBack implements FlatFileHeaderCallback, Flat
     
    private static final String EOF = System.getProperty("line.separator");
    
-   private static final String OUTPUT_HEADER = "INSERT INTO demo_wall_comment(TODO.......";
-   private static final String OUTPUT_FOOTER = EOF+EOF+"// Update Serial id...."+EOF+"setval('gbc_wall_comment_id_seq', 21, true)";
+   private static final String OUTPUT_HEADER = "INSERT INTO demo_wall_comment(id, item_id, author, is_appoved, date_creation, comment, date_updated) VALUES";
+   private static final String OUTPUT_FOOTER = EOF+EOF
+				+"--// Change name of DB, delete , 1st line and replace , last line by ;"+EOF
+				+"--// Update Serial id...."+EOF+"ALTER SEQUENCE demo_wall_comment_id_seq RESTART WITH 5;";
     
    @Override
    public void writeHeader(Writer writer) throws IOException {
-       writer.write(OUTPUT_HEADER + EOF);      
+       writer.write(OUTPUT_HEADER);      
    }
 
    @Override

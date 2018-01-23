@@ -3,6 +3,9 @@ package com.gbcreation.wall.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -11,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,6 +59,7 @@ public class WallControllerIntegrationTest {
 		.andExpect(jsonPath("$.count-all").value(28))
 		.andExpect(jsonPath("$.count-pictures").value(26))
 		.andExpect(jsonPath("$.count-videos").value(2))
+		.andExpect(jsonPath("$.count-comments").value(2))
 		;
 	}
 	
@@ -221,5 +226,64 @@ public class WallControllerIntegrationTest {
 	        		.andExpect(status().isOk())
 	        		.andExpect(content().string("[]"))
 	        		;
+	    }
+	 	
+	 	
+	 	@Test
+	    public void test_search_comments() throws Exception {
+    		
+	        mockMvc.perform(get(PATH+"/search/comment/a description"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+	        		.andExpect(jsonPath("$[*]").isArray())
+	        		.andExpect(jsonPath("$[*]", hasSize(12)))
+	        		.andExpect(jsonPath("$[0].comment").value("nice picture1"))
+	        		.andExpect(jsonPath("$[11].comment").value("ah ok, it's south africa"))
+	        		;
+	        
+	    }
+	    
+	    @Test
+	    public void test_search_comments_noResults() throws Exception {
+	    		
+	        mockMvc.perform(get(PATH+"/search/comment/another one"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+	        		.andExpect(content().string("[]"))
+	        		;
+	        
+	    }
+	    
+	    @Test
+	    public void test_search_authors() throws Exception {
+    		
+	        mockMvc.perform(get(PATH+"/search/author/an author"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+	        		.andExpect(jsonPath("$[*]").isArray())
+	        		.andExpect(jsonPath("$[*]", hasSize(12)))
+	        		.andExpect(jsonPath("$[0].author").value("John Doe"))
+	        		.andExpect(jsonPath("$[11].author").value("Guy Mann"))
+	        		;
+	        
+	    }
+	    
+	    @Test
+	    public void test_search_author_noResults() throws Exception {
+	    		
+	        mockMvc.perform(get(PATH+"/search/author/another one"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+	        		.andExpect(content().string("[]"))
+	        		;
+	        
 	    }
 }

@@ -14,6 +14,9 @@ public interface CommentRepository extends CrudRepository<Comment, Long>{
 	List<Comment> findTop100ByAuthorContainingIgnoreCaseOrderByCreatedAtDesc(String author);
 	
 	long countByItemId(Item itemId);
+	long countByItemIdId(long itemIdId);
+	
 	List<Comment> findByItemIdOrderByCreatedAtDesc(Item itemId);
-	List<Comment> findByItemIdIdOrderByCreatedAtDesc(Long itemId);
+	List<Comment> findByItemIdIdOrderByCreatedAtDesc(Long itemIdId);
+
 }

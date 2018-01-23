@@ -110,7 +110,9 @@ public class CommentRepositoryTest {
 	  	
 	    assertEquals(4, commentRepository.count());
 	    assertEquals(3, commentRepository.countByItemId(item1));
+	    assertEquals(3, commentRepository.countByItemIdId(item1.getId()));
 	    assertEquals(1, commentRepository.countByItemId(item2));
+	    assertEquals(1, commentRepository.countByItemIdId(item2.getId()));
 	    
 	    commentRepository.deleteAll();
 	    

@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gbcreation.wall.model.Comment;
 import com.gbcreation.wall.model.Item;
 import com.gbcreation.wall.model.ItemType;
+import com.gbcreation.wall.service.CommentService;
 import com.gbcreation.wall.service.ItemService;
 
 import lombok.Setter;
@@ -30,6 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 	@Resource
 	private ItemService itemService;
 	
+	@Resource
+	private CommentService commentService;
 
 	@RequestMapping(value="/count",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Map<String,Long> count() {
@@ -38,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 		count.put("count-all", itemService.countAll());
 		count.put("count-pictures", itemService.countPictures());
 		count.put("count-videos", itemService.countVideos());
+		count.put("count-comments", commentService.countAll());
 		return count;
 	}
 	
@@ -88,6 +93,18 @@ import lombok.extern.slf4j.Slf4j;
 	public @ResponseBody List<Item> retrieveItemsWithDescription(@PathVariable("description") String description) {
 		log.info("WallController: retrieveItemsWithDescription");
 		return itemService.findByDescriptionLike(description);
+	}
+	
+	@RequestMapping(value="/search/comment/{comment}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody List<Comment> retrieveCommentsWithComment(@PathVariable("comment") String comment) {
+		log.info("WallController: retrieveCommentsWithComment");
+		return commentService.findByCommentLike(comment);
+	}
+	
+	@RequestMapping(value="/search/author/{author}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody List<Comment> retrieveCommentsWithAuthor(@PathVariable("author") String author) {
+		log.info("WallController: retrieveCommentsWithAuthor");
+		return commentService.findByAuthorLike(author);
 	}
 	
 	
