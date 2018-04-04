@@ -30,3 +30,10 @@ INSERT INTO gbc_wall_item(id, file, path, description, date_creation, date_updat
 (231, '730999-robot-futurama-wallpapers-desktop-cartoon-cartoons-wallpaper-p-f6d36e.jpg', '/web/images/wall', 'bender cartoon', '2013-10-19 14:52:00.0', null, 1.777982, 0, 'PICTURE'),
 (232, '254638-bender-fry-leela-futurama-futurama-p-6fb68e.jpg', '/web/images/wall', 'slogan', '2013-10-19 14:52:00.0', null, 1.59901, 0, 'PICTURE'),
 (233, '508t2zlp-f5d399.jpg', '/web/images/wall', 'Leela', '2013-10-19 14:52:00.0', null, 1.333333, 0, 'PICTURE');
+
+
+INSERT INTO `gbc_wall_comment` (`id`, `item_id`, `author`, `comment`, `is_approved`, `date_creation`, `date_updated`) VALUES
+(1, 230, 'brother', 'Great picture', 1, '2015-12-01 13:08:49', '2013-11-22 13:08:49'),
+(2, 230, 'father', 'I prefer this picture', 1, '2015-12-02 23:41:09', '2017-01-20 23:41:09'),
+(3, 229, 'father', 'Where was the picture taken?', 1, '2015-12-03 23:41:09', '2017-01-20 23:41:09'),
+(4, 229, 'me', 'Jamaica', 1, '2017-01-20 23:41:09', '2015-12-04 23:41:09');

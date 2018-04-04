@@ -56,10 +56,11 @@ public class WallControllerIntegrationTest {
 		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk())
+		.andDo(print())
 		.andExpect(jsonPath("$.count-all").value(28))
 		.andExpect(jsonPath("$.count-pictures").value(26))
 		.andExpect(jsonPath("$.count-videos").value(2))
-		.andExpect(jsonPath("$.count-comments").value(2))
+		.andExpect(jsonPath("$.count-comments").value(4))
 		;
 	}
 	
@@ -232,16 +233,25 @@ public class WallControllerIntegrationTest {
 	 	@Test
 	    public void test_search_comments() throws Exception {
     		
-	        mockMvc.perform(get(PATH+"/search/comment/a description"))
+	        mockMvc.perform(get(PATH+"/search/comment/picture"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 	        		.andExpect(status().isOk())
 	        		.andExpect(jsonPath("$[*]").isArray())
-	        		.andExpect(jsonPath("$[*]", hasSize(12)))
-	        		.andExpect(jsonPath("$[0].comment").value("nice picture1"))
-	        		.andExpect(jsonPath("$[11].comment").value("ah ok, it's south africa"))
+	        		.andExpect(jsonPath("$[*]", hasSize(3)))
+	        		.andExpect(jsonPath("$[0].comment").value("Where was the picture taken?"))
+	        		.andExpect(jsonPath("$[2].comment").value("Great picture"))
 	        		;
+	        
+	        mockMvc.perform(get(PATH+"/search/comment/this picture"))
+		    		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+		    		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+		    		.andExpect(status().isOk())
+		    		.andExpect(jsonPath("$[*]").isArray())
+		    		.andExpect(jsonPath("$[*]", hasSize(1)))
+		    		.andExpect(jsonPath("$[0].comment").value("I prefer this picture"))
+		    		;
 	        
 	    }
 	    
@@ -261,15 +271,17 @@ public class WallControllerIntegrationTest {
 	    @Test
 	    public void test_search_authors() throws Exception {
     		
-	        mockMvc.perform(get(PATH+"/search/author/an author"))
+	        mockMvc.perform(get(PATH+"/search/author/ther"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 	        		.andExpect(status().isOk())
+	        		.andDo(print())
 	        		.andExpect(jsonPath("$[*]").isArray())
-	        		.andExpect(jsonPath("$[*]", hasSize(12)))
-	        		.andExpect(jsonPath("$[0].author").value("John Doe"))
-	        		.andExpect(jsonPath("$[11].author").value("Guy Mann"))
+	        		.andExpect(jsonPath("$[*]", hasSize(3)))
+	        		.andExpect(jsonPath("$[0].author").value("father"))
+	        		.andExpect(jsonPath("$[1].author").value("father"))
+	        		.andExpect(jsonPath("$[2].author").value("brother"))
 	        		;
 	        
 	    }

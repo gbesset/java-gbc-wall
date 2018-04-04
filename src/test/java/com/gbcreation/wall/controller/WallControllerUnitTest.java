@@ -320,7 +320,7 @@ public class WallControllerUnitTest {
 	    @Test
 	    public void test_search_authors() throws Exception {
 	    	generateItems(null);
-	    	when(commentServiceMock.findByAuthorLike(Mockito.eq("a description"))).thenReturn(generateComments());
+	    	when(commentServiceMock.findByAuthorLike(Mockito.eq("an author"))).thenReturn(generateComments());
     		
 	        mockMvc.perform(get(PATH+"/search/author/an author"))
 	        		.andDo(print())
@@ -351,17 +351,7 @@ public class WallControllerUnitTest {
 	        verify(commentServiceMock).findByAuthorLike("another one");
 	        verifyNoMoreInteractions(commentServiceMock);
 	    }
-	    
-	    @Test
-	    public void testRetrieveAllError() throws Exception{
-
-	         this.mockMvc.perform(get("/api/wall/all")
-	                 .accept(MediaType.parseMediaType("application/json;charset=UTF-8")))
-	                 .andExpect(status().isOk())
-	                 .andExpect(content().contentType("application/json"));
-	    }
-
-	    
+	        
 	    private List<Item> generateItems(ItemType type) {
 		    	items = new ArrayList<Item>();
 		    	if(type==null || ItemType.PICTURE==type) {

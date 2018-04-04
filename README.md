@@ -21,7 +21,7 @@ formater le texte et mettre en place script comme chez n pour auto indent et coh
 * Liquibase				[]
 
 ## Front & tests
-* Rest					[]
+* Rest					[X]
 * AngularJS				[]
 * TestNG					[]
 
