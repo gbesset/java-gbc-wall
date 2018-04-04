@@ -15,6 +15,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
@@ -31,6 +32,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@JsonFilter("ItemFilter")
 public class Comment {
 
 	@Id
@@ -44,7 +46,7 @@ public class Comment {
 	private String comment;
 	
 	@Column(nullable=false)
-	boolean isAppoved = true;
+	boolean isApproved = true;
 	
 
 	@Column(name = "date_creation", nullable = false, updatable = false)
@@ -58,7 +60,6 @@ public class Comment {
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "item_id")
-	@JsonIgnore
 	private Item itemId;
 	
 	public Comment(String author, String comment, Item item) {

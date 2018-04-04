@@ -14,6 +14,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.gbcreation.wall.model.Comment;
 import com.gbcreation.wall.model.Item;
 import com.gbcreation.wall.model.ItemType;
@@ -66,55 +71,87 @@ import lombok.extern.slf4j.Slf4j;
 	}
 	
 	@RequestMapping(value="/all",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody Iterable<Item> retrieveAll() {
+	public @ResponseBody String retrieveAll() throws JsonProcessingException {
 		log.info("WallController: retrieveAll");
-		return itemService.retrieveAllItems();
+		
+		//Pb commentaire - item -> Filter non export Json. (Itrabe<Item> disparait pour String et on utilise ObjectMapper
+		//Voir si OK ou si mieux....
+		
+		 ObjectMapper objectMapper = new ObjectMapper();
+		 FilterProvider filters = new SimpleFilterProvider().addFilter("ItemFilter", SimpleBeanPropertyFilter.serializeAllExcept("itemId"));
+		 // and then serialize using that filter provider:
+		 return objectMapper.writer(filters).writeValueAsString(itemService.retrieveAllItems());
+		
 	}
 	
 	@RequestMapping(value="/pictures",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Item> retrieveAllPictures() {
+	public @ResponseBody String retrieveAllPictures() throws JsonProcessingException {
 		log.info("WallController: retrieveAllPictures");
-		return itemService.retrieveAllPictures();
+		
+		 ObjectMapper objectMapper = new ObjectMapper();
+		 FilterProvider filters = new SimpleFilterProvider().addFilter("ItemFilter", SimpleBeanPropertyFilter.serializeAllExcept("itemId"));
+		 // and then serialize using that filter provider:
+		 return objectMapper.writer(filters).writeValueAsString(itemService.retrieveAllPictures());
 	}
 	
 	@RequestMapping(value="/videos",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Item> retrieveAllVideos() {
+	public @ResponseBody String retrieveAllVideos() throws JsonProcessingException {
 		log.info("WallController: retrieveAllVideos");
-		return itemService.retrieveAllVideos();
+		
+		 ObjectMapper objectMapper = new ObjectMapper();
+		 FilterProvider filters = new SimpleFilterProvider().addFilter("ItemFilter", SimpleBeanPropertyFilter.serializeAllExcept("itemId"));
+		 // and then serialize using that filter provider:
+		 return objectMapper.writer(filters).writeValueAsString(itemService.retrieveAllVideos());
 	}
 	
 	@RequestMapping(value="/search/title/{title}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Item> retrieveItemsWithTitle(@PathVariable("title") String title) {
+	public @ResponseBody String retrieveItemsWithTitle(@PathVariable("title") String title) throws JsonProcessingException {
 		log.info("WallController: retrieveItemsWithTitle");
-		return itemService.findByFileLike(title);
+		
+		 ObjectMapper objectMapper = new ObjectMapper();
+		 FilterProvider filters = new SimpleFilterProvider().addFilter("ItemFilter", SimpleBeanPropertyFilter.serializeAllExcept("itemId"));
+		 // and then serialize using that filter provider:
+		 return objectMapper.writer(filters).writeValueAsString(itemService.findByFileLike(title));
 	}
 	
 	@RequestMapping(value="/search/description/{description}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Item> retrieveItemsWithDescription(@PathVariable("description") String description) {
+	public @ResponseBody String retrieveItemsWithDescription(@PathVariable("description") String description) throws JsonProcessingException {
 		log.info("WallController: retrieveItemsWithDescription");
-		return itemService.findByDescriptionLike(description);
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		 FilterProvider filters = new SimpleFilterProvider().addFilter("ItemFilter", SimpleBeanPropertyFilter.serializeAllExcept("itemId"));
+		 // and then serialize using that filter provider:
+		 return objectMapper.writer(filters).writeValueAsString(itemService.findByDescriptionLike(description));
 	}
 	
 	@RequestMapping(value="/search/comment/{comment}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Comment> retrieveCommentsWithComment(@PathVariable("comment") String comment) {
+	public @ResponseBody String retrieveCommentsWithComment(@PathVariable("comment") String comment) throws JsonProcessingException {
 		log.info("WallController: retrieveCommentsWithComment");
-		return commentService.findByCommentLike(comment);
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		 FilterProvider filters = new SimpleFilterProvider().addFilter("ItemFilter", SimpleBeanPropertyFilter.serializeAllExcept("itemId"));
+		 // and then serialize using that filter provider:
+		 return objectMapper.writer(filters).writeValueAsString(commentService.findByCommentLike(comment));
 	}
 	
 	@RequestMapping(value="/search/author/{author}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Comment> retrieveCommentsWithAuthor(@PathVariable("author") String author) {
+	public @ResponseBody String retrieveCommentsWithAuthor(@PathVariable("author") String author) throws JsonProcessingException {
 		log.info("WallController: retrieveCommentsWithAuthor");
-		return commentService.findByAuthorLike(author);
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		 FilterProvider filters = new SimpleFilterProvider().addFilter("ItemFilter", SimpleBeanPropertyFilter.serializeAllExcept("itemId"));
+		 // and then serialize using that filter provider:
+		 return objectMapper.writer(filters).writeValueAsString(commentService.findByAuthorLike(author));
 	}
 	
 	
 	//post ou put? au moins POST...
-	@RequestMapping(value="/add",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	/*@RequestMapping(value="/add",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody String addItem() {
 		log.info("WallController: addItem");
 		itemService.addItem(new Item("test",Instant.now().toString(), "test", ItemType.PICTURE));
 		return "item added";
-	}
+	}*/
 	
 	//update, delete....
 }
