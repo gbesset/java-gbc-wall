@@ -1,6 +1,10 @@
 .DS_Store
 no-commit-notes.txt
 
+# Source et results migrationTool
+src/main/resources/migrationTool/*.sql
+/migrationTool/migrated/*
+
 # Compiled class file
 *.class
 /target/
@@ -15,6 +19,8 @@ no-commit-notes.txt
 *.zip
 *.tar.gz
 *.rar
+
+.springBeans
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
