@@ -2,13 +2,13 @@ package com.gbcreation.wall.controller;
 
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.gbcreation.wall.model.Comment;
 import com.gbcreation.wall.model.Item;
 import com.gbcreation.wall.model.ItemType;
 import com.gbcreation.wall.service.CommentService;
@@ -144,14 +143,4 @@ import lombok.extern.slf4j.Slf4j;
 		 return objectMapper.writer(filters).writeValueAsString(commentService.findByAuthorLike(author));
 	}
 	
-	
-	//post ou put? au moins POST...
-	/*@RequestMapping(value="/add",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody String addItem() {
-		log.info("WallController: addItem");
-		itemService.addItem(new Item("test",Instant.now().toString(), "test", ItemType.PICTURE));
-		return "item added";
-	}*/
-	
-	//update, delete....
 }
