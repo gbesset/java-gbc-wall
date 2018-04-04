@@ -5,6 +5,9 @@ no-commit-notes.txt
 src/main/resources/migrationTool/*.sql
 /migrationTool/migrated/*
 
+# PROD
+src/main/resources/application-prod.properties
+
 # Compiled class file
 *.class
 /target/
