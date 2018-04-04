@@ -10,7 +10,7 @@ public class SqlComment extends Comment{
 
 	@Override
 	public String toString() {
-		return new String (getId()+", "+sql(getItemId())+", "+sql(getAuthor())+", "+isAppoved()+", "+sql(getCreatedAt())+", "+sql(getComment())+", "+sql(getUpdatedAt()));
+		return new String (getId()+", "+sql(getItemId())+", "+sql(getAuthor())+", "+isApproved()+", "+sql(getCreatedAt())+", "+sql(getComment())+", "+sql(getUpdatedAt()));
 	}
 	
 	private String sql(String field) {

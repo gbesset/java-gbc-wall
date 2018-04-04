@@ -12,14 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 
 
 @RestController
-@RequestMapping("/home")
+@RequestMapping("/")
 @Slf4j
-public class HomeController {
+public class WelcomeController {
 
 
-	@RequestMapping(method=RequestMethod.GET)
-	public @ResponseBody String home() {
-		return "Hello on Welcome Page";
+	@RequestMapping(value="/",method=RequestMethod.GET)
+	public @ResponseBody String welcome() {
+		return "gbcreation - wall backend - Welcome";
 	}
 	
 }

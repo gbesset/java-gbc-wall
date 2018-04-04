@@ -47,7 +47,7 @@ public class CommentMigrationToolProcessor  implements ItemProcessor<MigrationSo
 		comment.setAuthor(cleanData(source.getAuthor()));
 		comment.setComment(cleanData(source.getComment()));
 		comment.setCreatedAt(formater.parse(cleanData(source.getCreationDate())));
-		comment.setAppoved((Boolean.valueOf(cleanData(source.getIsApproved()))));
+		comment.setApproved((Boolean.valueOf(cleanData(source.getIsApproved()))));
 		
 		log.debug("comment converted: id [{}] author [{}] comment [{}] creationDate [{}]", comment.getId(), comment.getAuthor(), comment.getComment(), comment.getCreatedAt());
 		

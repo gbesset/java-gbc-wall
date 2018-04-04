@@ -23,7 +23,9 @@ INSERT INTO gbc_wall_item(id, file, path, description, date_creation, date_updat
 (226, 'Futurama-Fry-2a657f.jpg', '/web/images/wall', 'Thinking', '2013-10-19 14:50:00.0', null, 1.332398, 0, 'PICTURE'),
 (227, 'futurama-south-park-78f236.jpg', '/web/images/wall', 'South Park', '2013-10-19 14:51:00.0', null, 1.362398, 0, 'PICTURE'),
 (228, 'futurama-logo-c3bf57.jpg', '/web/images/wall', 'Logo', '2013-10-19 14:51:00.0', null, 1.333333, 0, 'PICTURE'),
+--le plus vieux
 (229, 'big3-1cd860.gif', '/web/images/wall', 'Big 3', '2013-10-19 09:51:00.0', null, 1.333333, 0, 'PICTURE'),
+--le plus récent
 (230, 'bender-futurama-robot-p-753df5.jpg', '/web/images/wall', 'bender', '2015-10-19 14:51:00.0', null, 1.544554, 0, 'PICTURE'),
 (231, '730999-robot-futurama-wallpapers-desktop-cartoon-cartoons-wallpaper-p-f6d36e.jpg', '/web/images/wall', 'bender cartoon', '2013-10-19 14:52:00.0', null, 1.777982, 0, 'PICTURE'),
 (232, '254638-bender-fry-leela-futurama-futurama-p-6fb68e.jpg', '/web/images/wall', 'slogan', '2013-10-19 14:52:00.0', null, 1.59901, 0, 'PICTURE'),

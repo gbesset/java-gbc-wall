@@ -4,9 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalField;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -16,7 +20,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -26,20 +33,27 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.gbcreation.wall.model.Item;
 import com.gbcreation.wall.model.ItemType;
-import com.gbcreation.wall.util.WallUtils;
 
 
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-public class ItemRepositoryTest {
-
+@AutoConfigureTestDatabase(replace=Replace.NONE)
+public class ItemRepositoryIntegrationTest {
+	
+	@Autowired
+	private TestEntityManager entityManager;
+	
 	 @Autowired
-	  private ItemRepository itemRepository;
+	 private ItemRepository itemRepository;
 	 
 	 @Before
 	 public void setup() {
 		 itemRepository.deleteAll();
+		 
+		 //set up data scenario
+		 //Item item = new It..getClass().
+		 //entityManager.persist(item);
 	  }
 
 	 @Test
@@ -66,16 +80,12 @@ public class ItemRepositoryTest {
 	    //Assert Find One and All
 	  	assertEquals(itemSaved, itemRepository.findOne(itemSaved.getId()));
 	  	
-	  	Item itemSaved2 = itemRepository.save(new Item("codevideo1","http://youtube.com/some/path/", "Demo video 1", ItemType.VIDEO_YOUTUBE));
+	  	Item itemSaved2 = itemRepository.save(new Item("codevideo1","http://youtube.com/some/path/", "Demo video 1",ItemType.VIDEO_YOUTUBE));
 	  	assertEquals(2, itemRepository.count());
 	  	
 	  	for(Item it : itemRepository.findAll()){
-	  		if(ItemType.PICTURE.equals(it.getType())){
-	  			assertEquals(it, itemSaved);
-	  		}
-	  		else {
-	  			assertEquals(it, itemSaved2);
-	  		}
+	  		Item t = (it.getType()==ItemType.PICTURE) ? itemSaved : itemSaved2;
+	  		assertEquals(t.getId(),it.getId());
 	  	}
 	  	
 	  	//Assert Update
@@ -122,13 +132,12 @@ public class ItemRepositoryTest {
 		 assertEquals("codevideo4", results.get(1).getFile());
 		 assertEquals("codevideo1", results.get(4).getFile());
 		 
-		 results = itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("cODev");
-		 assertEquals(5, results.size());
-		 assertEquals("codevideo5", results.get(0).getFile());
-		 assertEquals("codevideo4", results.get(1).getFile());
-		 assertEquals("codevideo1", results.get(4).getFile());
-		 
 		 results = itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc(".png");
+		 assertEquals(2, results.size());
+		 assertEquals("picture5.png", results.get(0).getFile());
+		 assertEquals("picture2.png", results.get(1).getFile());
+		 
+		 results = itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc(".PnG");
 		 assertEquals(2, results.size());
 		 assertEquals("picture5.png", results.get(0).getFile());
 		 assertEquals("picture2.png", results.get(1).getFile());
@@ -138,15 +147,12 @@ public class ItemRepositoryTest {
 	 }
 	 
 	 @Test
-	  public void test_filtering_on_description_field_and_fieldIgnoreCase() {
+	  public void test_filtering_on_description() {
 		 for(Item it : createSomeItems()) {
 			 itemRepository.save(it);
 		 }
 		 
-		 List<Item> results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("Fourth Picture"));
-		 assertEquals("Fourth Picture", results.get(0).getDescription());
-		 
-		 results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("fOurTH pictuRe"));
+		 List<Item> results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("fOurTH pictuRe"));
 		 assertEquals("Fourth Picture", results.get(0).getDescription());
 		 
 		 results = itemRepository.findAll(ItemFilterSpecifications.descriptionLike("Seventh"));
@@ -214,40 +220,6 @@ public class ItemRepositoryTest {
 		 fail("not yet implemented");
 	  }
 	 
-	 @Test
-	  public void test_find_items_order_by_creation_date() {
-		 for(Item it : createSomeItems()) {
-			 itemRepository.save(it);
-		 }
-		 
-		 List<Item> results = itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("e");
-		 assertEquals(12, results.size());
-		 assertEquals("2018-04-05T15:11:00.225Z", Instant.ofEpochMilli(results.get(0).getCreatedAt().getTime()).toString());
-		 assertEquals("2017-01-10T15:11:00.225Z", Instant.ofEpochMilli(results.get(11).getCreatedAt().getTime()).toString());
-		 
-		 results = WallUtils.convertIterableToList(itemRepository.findAll(new Sort(Sort.Direction.DESC,"createdAt")));
-		 assertEquals(12, results.size());
-		 assertEquals("2018-04-05T15:11:00.225Z", Instant.ofEpochMilli(results.get(0).getCreatedAt().getTime()).toString());
-		 assertEquals("2018-04-04T15:11:00.225Z", Instant.ofEpochMilli(results.get(1).getCreatedAt().getTime()).toString());
-		 assertEquals("2017-02-10T15:11:00.225Z", Instant.ofEpochMilli(results.get(10).getCreatedAt().getTime()).toString());
-		 assertEquals("2017-01-10T15:11:00.225Z", Instant.ofEpochMilli(results.get(11).getCreatedAt().getTime()).toString());
-		 
-	  }
-	 
-	 @Test
-	  public void test_limmit_100_item_max() throws InterruptedException {
-		 for(int i=0; i<=200;i++) {
-			Item it = new Item("file-"+i, "/some/path/"+i, "d-"+i, ItemType.PICTURE);
-			itemRepository.save(it);
-			//PB TU too fast for date. little delay to order correctly
-			Thread.sleep(1);
-		 }
-		 List<Item> results = itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("file");
-		 assertEquals(100, results.size());
-		 assertEquals("file-200", results.get(0).getFile());
-		 assertEquals("file-101", results.get(99).getFile());
-		 
-	  }
 	 
 	  @Test
 	  public void test_paginate() {
@@ -371,5 +343,6 @@ public class ItemRepositoryTest {
 		  return items;
 	  }
 	  
-	  //todo tri par date 
+	  //toodo tri par date 
+	 
 }
