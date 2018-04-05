@@ -15,20 +15,14 @@ public interface ItemService {
 	
 	Item findById(Long id);
 	List<Item> findByFile(String title);
-	List<Item> findByFileLike(String title);
-	List<Item> findByDescriptionLike(String description);
+	Page<Item> findByFileLike(String title, Pageable pageable);
+	Page<Item> findByDescriptionLike(String description, Pageable pageable);
 	
 	Page<Item> retrieveItems(Pageable pageable);
-	List<Item> retrieveAllItems();
-	List<Item> retrieveAllPictures();
-	List<Item> retrieveAllVideos();
+	Page<Item> retrievePictures(Pageable pageable);
+	Page<Item> retrieveVideos(Pageable pageable);
 
 	
-	//TODO avec pageable (page=x?nbelem=y
-	//voir meme sort = https://stackoverflow.com/questions/43028457/spring-jpa-specification-with-sort
-	//List<Item> retrieveAllItems(Page);
-	//List<Item> retrieveAllPictures();
-	//List<Item> retrieveAllVideos();
 	
 	//Pour l'administration
 	void addItem(Item i);

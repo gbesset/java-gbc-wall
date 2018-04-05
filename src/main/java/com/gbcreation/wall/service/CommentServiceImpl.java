@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.gbcreation.wall.model.Comment;
@@ -32,8 +34,8 @@ public class CommentServiceImpl implements CommentService {
 	}
 
 	@Override
-	public List<Comment> findAll() {
-		return commentRepository.findAll();
+	public Page<Comment> retrieveComments(Pageable pageable) {
+		return commentRepository.findAllByOrderByCreatedAtDesc(pageable);
 	}
 	
 	@Override
@@ -47,18 +49,18 @@ public class CommentServiceImpl implements CommentService {
 	}
 
 	@Override
-	public List<Comment> findByItemIdId(Long itemIdId) {
-		return commentRepository.findByItemIdIdOrderByCreatedAtDesc(itemIdId);
+	public Page<Comment> findByItemIdId(Long itemIdId, Pageable pageable) {
+		return commentRepository.findByItemIdIdOrderByCreatedAtDesc(itemIdId, pageable);
 	}
 
 	@Override
-	public List<Comment> findByCommentLike(String comment) {
-		return commentRepository.findTop100ByCommentContainingIgnoreCaseOrderByCreatedAtDesc(comment);
+	public Page<Comment> findByCommentLike(String comment, Pageable pageable) {
+		return commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc(comment, pageable);
 	}
 
 	@Override
-	public List<Comment> findByAuthorLike(String author) {
-		return commentRepository.findTop100ByAuthorContainingIgnoreCaseOrderByCreatedAtDesc(author);
+	public Page<Comment> findByAuthorLike(String author, Pageable pageable) {
+		return commentRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc(author, pageable);
 	}
 
 	@Override

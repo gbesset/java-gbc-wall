@@ -69,34 +69,31 @@ import lombok.extern.slf4j.Slf4j;
 	@RequestMapping(value="/items", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Page<Item> retrieveItems(Pageable pageable)  {
-	//public Page<Item> retrieveItems(@RequestParam( "page" ) int page, @RequestParam( "size" ) int size)  {
 		
 		log.info("WallController: retrieveItems");
 			
-		//return itemService.retrieveAllItems();
-		//return itemService.retrieveItems(new PageRequest(new Integer(page) -1, new Integer(size)));
 		return itemService.retrieveItems(pageable);
 	}
 	
 	@RequestMapping(value="/pictures",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Item> retrieveAllPictures() {
+	public @ResponseBody Page<Item> retrieveAllPictures(Pageable pageable) {
 		log.info("WallController: retrieveAllPictures");
 		
-		return itemService.retrieveAllPictures();
+		return itemService.retrievePictures(pageable);
 	}
 	
 	@RequestMapping(value="/videos",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Item> retrieveAllVideos() {
+	public @ResponseBody Page<Item> retrieveAllVideos(Pageable pageable) {
 		log.info("WallController: retrieveAllVideos");
 		
-		return itemService.retrieveAllVideos();
+		return itemService.retrieveVideos(pageable);
 	}
 	
 	@RequestMapping(value="/comments",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Comment> retrieveComments()  {
+	public @ResponseBody Page<Comment> retrieveComments(Pageable pageable)  {
 		log.info("WallController: retrieveComments");
 		
-		return commentService.findAll();
+		return commentService.retrieveComments(pageable);
 	}
 	
 	@RequestMapping(value="/comment/{id}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
@@ -107,39 +104,39 @@ import lombok.extern.slf4j.Slf4j;
 	}
 	
 	@RequestMapping(value="/comments/item/{id}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Comment> retrieveCommentsByItemId(@PathVariable("id") Long id) {
+	public @ResponseBody Page<Comment> retrieveCommentsByItemId(@PathVariable("id") Long id, Pageable pageable) {
 		log.info("WallController: retrieveCommentsByItemId {}",id);
 		
-		return commentService.findByItemIdId(id);
+		return commentService.findByItemIdId(id,pageable);
 	}
 	
 	
 	@RequestMapping(value="/search/title/{title}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Item> retrieveItemsWithTitle(@PathVariable("title") String title) {
+	public @ResponseBody Page<Item> retrieveItemsWithTitle(@PathVariable("title") String title, Pageable pageable) {
 		log.info("WallController: retrieveItemsWithTitle");
 		
-		return itemService.findByFileLike(title);
+		return itemService.findByFileLike(title, pageable);
 	}
 	
 	@RequestMapping(value="/search/description/{description}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Item> retrieveItemsWithDescription(@PathVariable("description") String description) {
+	public @ResponseBody Page<Item> retrieveItemsWithDescription(@PathVariable("description") String description, Pageable pageable) {
 		log.info("WallController: retrieveItemsWithDescription");
 		
-		return itemService.findByDescriptionLike(description);
+		return itemService.findByDescriptionLike(description, pageable);
 	}
 	
 	@RequestMapping(value="/search/comment/{comment}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Comment> retrieveCommentsWithComment(@PathVariable("comment") String comment) {
+	public @ResponseBody Page<Comment> retrieveCommentsWithComment(@PathVariable("comment") String comment, Pageable pageable) {
 		log.info("WallController: retrieveCommentsWithComment");
 		
-		return commentService.findByCommentLike(comment);
+		return commentService.findByCommentLike(comment, pageable);
 	}
 	
 	@RequestMapping(value="/search/author/{author}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Comment> retrieveCommentsWithAuthor(@PathVariable("author") String author) {
+	public @ResponseBody Page<Comment> retrieveCommentsWithAuthor(@PathVariable("author") String author, Pageable pageable) {
 		log.info("WallController: retrieveCommentsWithAuthor");
 		
-		return commentService.findByAuthorLike(author);
+		return commentService.findByAuthorLike(author, pageable);
 	}
 	
 }

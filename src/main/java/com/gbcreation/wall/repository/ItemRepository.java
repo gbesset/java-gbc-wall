@@ -9,10 +9,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import com.gbcreation.wall.model.Item;
+import com.gbcreation.wall.model.ItemType;
 
 //This will be AUTO IMPLEMENTED by Spring into a Bean called itemRepository
 public interface ItemRepository extends PagingAndSortingRepository<Item,Long>, JpaSpecificationExecutor{
 	
+	//virer !!
 	List<Item> findByFileOrderByCreatedAtDesc(String file);
 	List<Item> findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc(String file);
 	
@@ -26,8 +28,12 @@ public interface ItemRepository extends PagingAndSortingRepository<Item,Long>, J
 	List<Item> findByFileMyRqt(String file);
 
 	
+	//Attention au by  findAll BY  order....
 	Page<Item> findAllByOrderByCreatedAtDesc(Pageable pageable);
-		
+	Page<Item> findAllByTypeInOrderByCreatedAtDesc(List<ItemType> types, Pageable pageable);
+	Page<Item> findByFileContainingIgnoreCaseOrderByCreatedAtDesc(String file, Pageable pageable);
+	Page<Item> findByDescriptionContainingIgnoreCaseOrderByCreatedAtDesc(String file, Pageable pageable);
+	
 	// Renvoie un résultat paginé avec des méta-données sur la recherche (nombre de pages, etc.)
 	List<Item> findByDescriptionContaining(String description, Pageable pageable);
 }

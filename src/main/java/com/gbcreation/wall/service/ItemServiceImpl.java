@@ -1,5 +1,6 @@
 package com.gbcreation.wall.service;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.gbcreation.wall.model.Item;
+import com.gbcreation.wall.model.ItemType;
 import com.gbcreation.wall.repository.ItemFilterSpecifications;
 import com.gbcreation.wall.repository.ItemRepository;
 import com.gbcreation.wall.util.WallUtils;
@@ -50,13 +52,13 @@ public class ItemServiceImpl implements ItemService{
 	}
 
 	@Override
-	public List<Item> findByFileLike(String file) {
-		return itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc(file);
+	public Page<Item> findByFileLike(String file, Pageable pageable) {
+		return itemRepository.findByFileContainingIgnoreCaseOrderByCreatedAtDesc(file, pageable);
 	}
 	
 	@Override
-	public List<Item> findByDescriptionLike(String description) {
-		return itemRepository.findAll(ItemFilterSpecifications.descriptionLike(description), new Sort(Sort.Direction.DESC,"createdAt"));
+	public Page<Item> findByDescriptionLike(String description, Pageable pageable) {
+		return itemRepository.findByDescriptionContainingIgnoreCaseOrderByCreatedAtDesc(description, pageable);
 	}
 	
 	@Override
@@ -65,18 +67,16 @@ public class ItemServiceImpl implements ItemService{
 	}
 	
 	@Override
-	public List<Item> retrieveAllItems() {
-		return WallUtils.convertIterableToList(itemRepository.findAll(new Sort(Sort.Direction.DESC,"createdAt")));
+	public Page<Item> retrievePictures(Pageable pageable) {
+		return itemRepository.findAllByTypeInOrderByCreatedAtDesc(Arrays.asList(ItemType.PICTURE),pageable);
 	}
 
 	@Override
-	public List<Item> retrieveAllPictures() {
-		return WallUtils.convertIterableToList(itemRepository.findAll(ItemFilterSpecifications.isItemPicture(),new Sort(Sort.Direction.DESC,"createdAt")));
-	}
-
-	@Override
-	public List<Item> retrieveAllVideos() {
-		return WallUtils.convertIterableToList(itemRepository.findAll(ItemFilterSpecifications.isItemVideo(),new Sort(Sort.Direction.DESC,"createdAt")));
+	public Page<Item> retrieveVideos(Pageable pageable) {
+		return itemRepository.findAllByTypeInOrderByCreatedAtDesc(Arrays.asList(ItemType.VIDEO,
+																			ItemType.VIDEO_VIMEO,
+																			ItemType.VIDEO_YOUTUBE)
+															  ,pageable);
 	}
 
 	@Override
