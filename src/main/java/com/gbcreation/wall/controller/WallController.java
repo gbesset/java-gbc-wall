@@ -2,6 +2,7 @@ package com.gbcreation.wall.controller;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.gbcreation.wall.model.Comment;
 import com.gbcreation.wall.model.Item;
 import com.gbcreation.wall.model.ItemType;
 import com.gbcreation.wall.service.CommentService;
@@ -50,9 +52,9 @@ import lombok.extern.slf4j.Slf4j;
 		return count;
 	}
 	
-	@RequestMapping(value="/{id}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody Map<String,Object> findById(@PathVariable("id") Long id) {
-		log.info("WallController: findById {}",id);
+	@RequestMapping(value="/item/{id}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody Map<String,Object> retrieveItemById(@PathVariable("id") Long id) {
+		log.info("WallController: retrieveItemById {}",id);
 		Map<String, Object> result = new HashMap<String,Object>();
 		
 		Item itemFound = itemService.findById(id);
@@ -69,9 +71,9 @@ import lombok.extern.slf4j.Slf4j;
 		return result;
 	}
 	
-	@RequestMapping(value="/all",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody String retrieveAll() throws JsonProcessingException {
-		log.info("WallController: retrieveAll");
+	@RequestMapping(value="/items",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody String retrieveItems() throws JsonProcessingException {
+		log.info("WallController: retrieveItems");
 		
 		//Pb commentaire - item -> Filter non export Json. (Itrabe<Item> disparait pour String et on utilise ObjectMapper
 		//Voir si OK ou si mieux....
@@ -102,6 +104,41 @@ import lombok.extern.slf4j.Slf4j;
 		 // and then serialize using that filter provider:
 		 return objectMapper.writer(filters).writeValueAsString(itemService.retrieveAllVideos());
 	}
+	
+	@RequestMapping(value="/comments",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody String retrieveComments() throws JsonProcessingException {
+		log.info("WallController: retrieveComments");
+		
+		 ObjectMapper objectMapper = new ObjectMapper();
+		 FilterProvider filters = new SimpleFilterProvider().addFilter("ItemFilter", SimpleBeanPropertyFilter.serializeAllExcept("itemId"));
+		 // and then serialize using that filter provider:
+		 return objectMapper.writer(filters).writeValueAsString(commentService.findAll());
+		
+	}
+	
+	@RequestMapping(value="/comment/{id}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody String retrieveCommentById(@PathVariable("id") Long id) throws JsonProcessingException {
+		log.info("WallController: retrieveCommentById {}",id);
+		
+		 ObjectMapper objectMapper = new ObjectMapper();
+		 FilterProvider filters = new SimpleFilterProvider().addFilter("ItemFilter", SimpleBeanPropertyFilter.serializeAllExcept("itemId"));
+		 // and then serialize using that filter provider:
+		 return objectMapper.writer(filters).writeValueAsString(commentService.findById(id));
+		
+	}
+	
+	@RequestMapping(value="/comments/item/{id}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody String retrieveCommentsByItemId(@PathVariable("id") Long id) throws JsonProcessingException {
+		log.info("WallController: retrieveCommentsByItemId {}",id);
+		Map<String, Object> result = new HashMap<String,Object>();
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		 FilterProvider filters = new SimpleFilterProvider().addFilter("ItemFilter", SimpleBeanPropertyFilter.serializeAllExcept("itemId"));
+		 // and then serialize using that filter provider:
+		 return objectMapper.writer(filters).writeValueAsString(commentService.findByItemIdId(id));
+		
+	}
+	
 	
 	@RequestMapping(value="/search/title/{title}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody String retrieveItemsWithTitle(@PathVariable("title") String title) throws JsonProcessingException {

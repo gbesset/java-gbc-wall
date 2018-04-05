@@ -103,6 +103,18 @@ public class CommentServiceTest {
     
 	
 	@Test
+	public void test_findAll() {
+		
+		when(commentRepository.findAll()).thenReturn(comments);
+		List<Comment> result = commentService.findAll();
+
+		assertEquals(comments,result);
+
+		verify(commentRepository).findAll();
+		verifyNoMoreInteractions(commentRepository);
+	}
+	
+	@Test
 	public void test_findBy_Id() {
 		
 		Comment comment = new Comment("Jane Doe", "it's true, ont of your best", items.get(0));

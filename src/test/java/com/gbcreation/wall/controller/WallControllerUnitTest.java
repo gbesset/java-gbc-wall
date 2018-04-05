@@ -78,7 +78,7 @@ public class WallControllerUnitTest {
 	public void test_retrieve_from_id() throws Exception {
 		when(itemServiceMock.findById(1234567L)).thenReturn(generateItems(null).get(4));
 
-		mockMvc.perform(get(PATH+"/1234567"))
+		mockMvc.perform(get(PATH+"/item/1234567"))
 		.andDo(print())
 		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -96,7 +96,7 @@ public class WallControllerUnitTest {
 	public void test_retrieve_from_id_notFound() throws Exception {
 		when(itemServiceMock.findById(1234567L)).thenReturn(generateItems(null).get(4));
 
-		mockMvc.perform(get(PATH+"/0000000"))
+		mockMvc.perform(get(PATH+"/item/0000000"))
 		.andDo(print())
 		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -115,7 +115,7 @@ public class WallControllerUnitTest {
 	public void test_retrieve_all_items_OK() throws Exception {
 		when(itemServiceMock.retrieveAllItems()).thenReturn(generateItems(null));
 
-		mockMvc.perform(get(PATH+"/all"))
+		mockMvc.perform(get(PATH+"/items"))
 		.andDo(print())
 		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -129,9 +129,10 @@ public class WallControllerUnitTest {
 		verify(itemServiceMock).retrieveAllItems();
 		verifyNoMoreInteractions(itemServiceMock);
 	}
+	
 	@Test
 	public void test_retrieve_all_items_empty() throws Exception {
-		mockMvc.perform(get(PATH+"/all"))
+		mockMvc.perform(get(PATH+"/items"))
 		.andDo(print())
 		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -199,9 +200,8 @@ public class WallControllerUnitTest {
 	    @Test
 	    public void test_retrieve_all_videos_empty() throws Exception {
 	        mockMvc.perform(get(PATH+"/videos"))
-	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
-	        		 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 	        		.andExpect(status().isOk())
 	        		.andExpect(content().string("[]"))
 	        		;
@@ -209,6 +209,61 @@ public class WallControllerUnitTest {
 	        verify(itemServiceMock).retrieveAllVideos();
 	        verifyNoMoreInteractions(itemServiceMock);
 	    }
+	    
+	    @Test
+		public void test_retrieve_all_comments_OK() throws Exception {
+	     	generateItems(null);
+			when(commentServiceMock.findAll()).thenReturn(generateComments());
+
+			mockMvc.perform(get(PATH+"/comments"))
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$[*]").isArray())
+			.andExpect(jsonPath("$[*]", hasSize(12)))
+			.andExpect(jsonPath("$[0].comment").value("nice picture1"))
+			.andExpect(jsonPath("$[11].comment").value("ah ok, it's south africa"))
+			;
+
+			verify(commentServiceMock).findAll();
+			verifyNoMoreInteractions(commentServiceMock);
+		}
+	    
+	    @Test
+		public void test_retrieve_comment_from_id() throws Exception {
+	     	generateItems(null);
+			when(commentServiceMock.findById(4L)).thenReturn(generateComments().get(3));
+
+			mockMvc.perform(get(PATH+"/comment/4"))
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.comment").value("nice video2"))
+			;
+
+			verify(commentServiceMock).findById(4L);
+			verifyNoMoreInteractions(commentServiceMock);
+		}
+	    
+	    @Test
+		public void test_retrieve_comment_from_item__id() throws Exception {
+	     	generateItems(null);
+			when(commentServiceMock.findByItemIdId(4L)).thenReturn(generateComments());
+
+			mockMvc.perform(get(PATH+"/comments/item/4"))
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$[*]").isArray())
+			.andExpect(jsonPath("$[*]", hasSize(12)))
+			.andExpect(jsonPath("$[0].comment").value("nice picture1"))
+			.andExpect(jsonPath("$[11].comment").value("ah ok, it's south africa"))
+			;
+
+			verify(commentServiceMock).findByItemIdId(4L);
+			verifyNoMoreInteractions(commentServiceMock);
+		}
+	    
 	    
 	    @Test
 	    public void test_search_title() throws Exception {

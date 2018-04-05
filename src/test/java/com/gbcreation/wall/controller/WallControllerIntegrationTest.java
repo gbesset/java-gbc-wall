@@ -67,7 +67,7 @@ public class WallControllerIntegrationTest {
 	@Test
 	public void test_retrieve_all_items_OK() throws Exception {
 
-		mockMvc.perform(get(PATH + "/all"))
+		mockMvc.perform(get(PATH + "/items"))
 			.andDo(print())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))

@@ -72,7 +72,7 @@ public class WallControllerWebAppContextTest extends WallApplicationTests{
     @Test
     public void test_retrieve_all_items_OK() throws Exception {
    
-        mockMvc.perform(get("/api/wall/all"))
+        mockMvc.perform(get("/api/wall/items"))
         		.andDo(print())
         		//MediaType.APPLICATION_JSON_VALUE
         		.andExpect(content().contentType("application/json;charset=UTF-8"))

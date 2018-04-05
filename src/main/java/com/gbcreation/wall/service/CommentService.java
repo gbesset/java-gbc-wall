@@ -10,6 +10,7 @@ public interface CommentService {
 	long countByItemId(Item itemId);
 	long countByItemIdId(long itemIdId);
 	
+	List<Comment> findAll();
 	Comment findById(Long id);
 	List<Comment> findByItemId(Item itemId);
 	List<Comment> findByItemIdId(Long itemIdId);

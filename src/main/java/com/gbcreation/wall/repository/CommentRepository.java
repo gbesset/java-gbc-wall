@@ -18,5 +18,7 @@ public interface CommentRepository extends CrudRepository<Comment, Long>{
 	
 	List<Comment> findByItemIdOrderByCreatedAtDesc(Item itemId);
 	List<Comment> findByItemIdIdOrderByCreatedAtDesc(Long itemIdId);
+	
+	List<Comment> findAll();
 
 }
