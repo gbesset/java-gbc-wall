@@ -1,6 +1,20 @@
-# Quelques notes ou trucs à faire
+# Quelques notes et actions à mettre en place
 
 ##Notes
 
-## TODO
+##TODO
 + Dockerisation app  https://spring.io/guides/gs/spring-boot-docker/
++ Test avec cuncumber (https://github.com/iblasquez/tuto_bdd_cucumber)
+
+Script lancement app avec un profil PROD
+java -jar .... -profile....
+
+### Done
+Modif nom colonne dans table sur BDD locale
+ALTER TABLE gbc_wall_comment RENAME is_appoved TO is_approved;
+
+#GRANT SELECT, INSERT, UPDATE, DELETE ON myTable TO myUser;
+
+
+
+
