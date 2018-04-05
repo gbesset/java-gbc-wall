@@ -26,7 +26,7 @@ public interface ItemRepository extends PagingAndSortingRepository<Item,Long>, J
 	List<Item> findByFileMyRqt(String file);
 
 	
-	Page findAll(Pageable pageable);
+	Page<Item> findAllByOrderByCreatedAtDesc(Pageable pageable);
 		
 	// Renvoie un résultat paginé avec des méta-données sur la recherche (nombre de pages, etc.)
 	List<Item> findByDescriptionContaining(String description, Pageable pageable);

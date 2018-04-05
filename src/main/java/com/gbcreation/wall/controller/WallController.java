@@ -1,28 +1,23 @@
 package com.gbcreation.wall.controller;
 
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.gbcreation.wall.model.Comment;
 import com.gbcreation.wall.model.Item;
-import com.gbcreation.wall.model.ItemType;
 import com.gbcreation.wall.service.CommentService;
 import com.gbcreation.wall.service.ItemService;
 
@@ -71,11 +66,16 @@ import lombok.extern.slf4j.Slf4j;
 		return result;
 	}
 	
-	@RequestMapping(value="/items",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody List<Item> retrieveItems()  {
-		log.info("WallController: retrieveItems");
+	@RequestMapping(value="/items", method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Page<Item> retrieveItems(Pageable pageable)  {
+	//public Page<Item> retrieveItems(@RequestParam( "page" ) int page, @RequestParam( "size" ) int size)  {
 		
-		return itemService.retrieveAllItems();
+		log.info("WallController: retrieveItems");
+			
+		//return itemService.retrieveAllItems();
+		//return itemService.retrieveItems(new PageRequest(new Integer(page) -1, new Integer(size)));
+		return itemService.retrieveItems(pageable);
 	}
 	
 	@RequestMapping(value="/pictures",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)

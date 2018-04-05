@@ -5,6 +5,8 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -55,6 +57,11 @@ public class ItemServiceImpl implements ItemService{
 	@Override
 	public List<Item> findByDescriptionLike(String description) {
 		return itemRepository.findAll(ItemFilterSpecifications.descriptionLike(description), new Sort(Sort.Direction.DESC,"createdAt"));
+	}
+	
+	@Override
+	public Page<Item> retrieveItems(Pageable pageable) {
+		return itemRepository.findAllByOrderByCreatedAtDesc(pageable);
 	}
 	
 	@Override

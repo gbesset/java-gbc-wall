@@ -1,10 +1,11 @@
 package com.gbcreation.wall.service;
 
-import java.time.Instant;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.gbcreation.wall.model.Item;
-import com.gbcreation.wall.model.ItemType;
 
 public interface ItemService {
 	
@@ -17,6 +18,7 @@ public interface ItemService {
 	List<Item> findByFileLike(String title);
 	List<Item> findByDescriptionLike(String description);
 	
+	Page<Item> retrieveItems(Pageable pageable);
 	List<Item> retrieveAllItems();
 	List<Item> retrieveAllPictures();
 	List<Item> retrieveAllVideos();
