@@ -15,6 +15,9 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -59,6 +62,7 @@ public class Item {
 	@Enumerated(EnumType.STRING)
 	private ItemType type;
 	
+	@JsonManagedReference
 	@OneToMany(mappedBy="itemId")
 	private Collection<Comment> comments;
 	
