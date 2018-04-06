@@ -1,6 +1,16 @@
 # Quelques notes et actions à mettre en place
 
+TODO : Angular - REST
+https://www.youtube.com/watch?v=wv3iZ11st0k
+
+## Pb
+mockito pageable
+https://stackoverflow.com/questions/45188675/mocking-a-method-which-returns-page-interface
+
 ##Notes
+java.util.Date ad milliseconds
+https://www.fileformat.info/tip/java/date2millis.htm
+ex 1 481 027 580 000  06/12/16 12:33
 
 ##TODO
 + Dockerisation app  https://spring.io/guides/gs/spring-boot-docker/
@@ -16,5 +26,7 @@ ALTER TABLE gbc_wall_comment RENAME is_appoved TO is_approved;
 #GRANT SELECT, INSERT, UPDATE, DELETE ON myTable TO myUser;
 
 
-
+http://localhost:8080/api/wall/items
+http://localhost:8080/api/wall/items?page=2&size=25
+http://localhost:8080/api/wall/items?size=10&sort=file,asc
 
