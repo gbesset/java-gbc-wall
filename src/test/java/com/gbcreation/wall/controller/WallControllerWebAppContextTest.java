@@ -14,6 +14,9 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -45,9 +48,16 @@ public class WallControllerWebAppContextTest extends WallApplicationTests{
     private ItemService wallService;
 	  
 	private  List<Item> items;
+	
+	private Pageable pageable;
+	
+	@Mock
+	private Page page;;
 
     @Before
     public void setup() {
+    		pageable = new PageRequest(0,20);
+    		
         MockitoAnnotations.initMocks(this);
         
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
@@ -66,7 +76,9 @@ public class WallControllerWebAppContextTest extends WallApplicationTests{
 		  items.add(new Item("codevideo4","http://youtube.com/some/path/", "Demo video 4",ItemType.VIDEO_YOUTUBE));
 		  items.add(new Item("picture7.jpg","/some/local/folder/", "Seventh Picture",ItemType.PICTURE));
 		  items.add(new Item("codevideo5","http://youtube.com/some/path/", "Demo video 5",ItemType.VIDEO_YOUTUBE));
-		  when(wallService.retrieveAllItems()).thenReturn(items);
+		  
+		  when(page.getContent()).thenReturn(items);
+		  when(wallService.retrieveItems(pageable)).thenReturn(page);
     }
 	
     @Test

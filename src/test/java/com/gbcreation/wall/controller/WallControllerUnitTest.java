@@ -1,6 +1,8 @@
 package com.gbcreation.wall.controller;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -13,12 +15,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -48,7 +55,17 @@ public class WallControllerUnitTest {
 	private  List<Item> items;
 	
 	private  List<Comment> comments;
+	
+	private Pageable pageable;
+	
+	@Mock
+	private Page page;
 	  
+	@Before
+	public void setUp() {
+		pageable = new PageRequest(0,20);
+	}
+	
 	@Test
 	public void test_count() throws Exception {
 		when(itemServiceMock.countAll()).thenReturn(12L);
@@ -113,7 +130,11 @@ public class WallControllerUnitTest {
 	
 	@Test
 	public void test_retrieve_all_items_OK() throws Exception {
-		when(itemServiceMock.retrieveAllItems()).thenReturn(generateItems(null));
+		fail("devrait marcher mais pb pageable..");
+		when(page.getContent()).thenReturn(generateItems(null));
+		Mockito.when(itemServiceMock.retrieveItems(any(Pageable.class))).thenReturn(page);
+		
+		//when(itemServiceMock.retrieveAllItems()).thenReturn(generateItems(null));
 
 		mockMvc.perform(get(PATH+"/items"))
 		.andDo(print())
@@ -126,7 +147,7 @@ public class WallControllerUnitTest {
 		.andExpect(jsonPath("$[11].file").value("codevideo5"))
 		;
 
-		verify(itemServiceMock).retrieveAllItems();
+		verify(itemServiceMock).retrieveItems(pageable);
 		verifyNoMoreInteractions(itemServiceMock);
 	}
 	
@@ -140,13 +161,14 @@ public class WallControllerUnitTest {
 		.andExpect(content().string("[]"))
 		;
 
-		verify(itemServiceMock).retrieveAllItems();
+		verify(itemServiceMock).retrieveItems(pageable);
 		verifyNoMoreInteractions(itemServiceMock);
 	}
 	    
 	    @Test
 	    public void test_retrieve_all_pictures_OK() throws Exception {
-	    		when(itemServiceMock.retrieveAllPictures()).thenReturn(generateItems(ItemType.PICTURE));
+	    		when(page.getContent()).thenReturn(generateItems(ItemType.PICTURE));
+	    		when(itemServiceMock.retrievePictures(pageable)).thenReturn(page);
 	    	
 	        mockMvc.perform(get(PATH+"/pictures"))
 	        		.andDo(print())
@@ -159,13 +181,16 @@ public class WallControllerUnitTest {
 	        	    .andExpect(jsonPath("$[6].file").value("picture7.jpg"))
 	        		;
 	        
-	        verify(itemServiceMock).retrieveAllPictures();
+	        verify(itemServiceMock).retrievePictures(pageable);
 	        verifyNoMoreInteractions(itemServiceMock);
 	    }
 	    
 	    @Test
 	    public void test_retrieve_all_pictures_empty() throws Exception {
 	    	
+	    		when(page.getContent()).thenReturn(new ArrayList<>());
+	    		when(itemServiceMock.retrievePictures(pageable)).thenReturn(page);
+    		
 	        mockMvc.perform(get(PATH+"/pictures"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
@@ -174,14 +199,16 @@ public class WallControllerUnitTest {
 	        		.andExpect(content().string("[]"))
 	        		;
 	        
-	        verify(itemServiceMock).retrieveAllPictures();
+	        verify(itemServiceMock).retrievePictures(pageable);
 	        verifyNoMoreInteractions(itemServiceMock);
 	    }
 	    
 	    
 	    @Test
 	    public void test_retrieve_all_videos_OK() throws Exception {
-	    		when(itemServiceMock.retrieveAllVideos()).thenReturn(generateItems(ItemType.VIDEO));
+	    		when(page.getContent()).thenReturn(generateItems(ItemType.VIDEO));
+	    		when(itemServiceMock.retrieveVideos(pageable)).thenReturn(page);
+	    		
 	        mockMvc.perform(get(PATH+"/videos"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
@@ -193,12 +220,16 @@ public class WallControllerUnitTest {
 	        	    .andExpect(jsonPath("$[4].file").value("codevideo5"))
 	        		;
 	        
-	        verify(itemServiceMock).retrieveAllVideos();
+	        verify(itemServiceMock).retrieveVideos(pageable);
 	        verifyNoMoreInteractions(itemServiceMock);
 	    }
 	    
 	    @Test
 	    public void test_retrieve_all_videos_empty() throws Exception {
+	    	
+	    		when(page.getContent()).thenReturn(new ArrayList<>());
+	    		when(itemServiceMock.retrieveVideos(pageable)).thenReturn(page);
+    		
 	        mockMvc.perform(get(PATH+"/videos"))
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -206,14 +237,15 @@ public class WallControllerUnitTest {
 	        		.andExpect(content().string("[]"))
 	        		;
 	        
-	        verify(itemServiceMock).retrieveAllVideos();
+	        verify(itemServiceMock).retrieveVideos(pageable);
 	        verifyNoMoreInteractions(itemServiceMock);
 	    }
 	    
 	    @Test
 		public void test_retrieve_all_comments_OK() throws Exception {
 	     	generateItems(null);
-			when(commentServiceMock.findAll()).thenReturn(generateComments());
+	     	when(page.getContent()).thenReturn(generateComments());
+			when(commentServiceMock.retrieveComments(pageable)).thenReturn(page);
 
 			mockMvc.perform(get(PATH+"/comments"))
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
@@ -225,7 +257,7 @@ public class WallControllerUnitTest {
 			.andExpect(jsonPath("$[11].comment").value("ah ok, it's south africa"))
 			;
 
-			verify(commentServiceMock).findAll();
+			verify(commentServiceMock).retrieveComments(pageable);
 			verifyNoMoreInteractions(commentServiceMock);
 		}
 	    
@@ -248,7 +280,8 @@ public class WallControllerUnitTest {
 	    @Test
 		public void test_retrieve_comment_from_item__id() throws Exception {
 	     	generateItems(null);
-			when(commentServiceMock.findByItemIdId(4L)).thenReturn(generateComments());
+	     	when(page.getContent()).thenReturn(generateComments());
+			when(commentServiceMock.findByItemIdId(4L, pageable)).thenReturn(page);
 
 			mockMvc.perform(get(PATH+"/comments/item/4"))
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
@@ -260,14 +293,16 @@ public class WallControllerUnitTest {
 			.andExpect(jsonPath("$[11].comment").value("ah ok, it's south africa"))
 			;
 
-			verify(commentServiceMock).findByItemIdId(4L);
+			verify(commentServiceMock).findByItemIdId(4L, pageable);
 			verifyNoMoreInteractions(commentServiceMock);
 		}
 	    
 	    
 	    @Test
 	    public void test_search_title() throws Exception {
-	    		when(itemServiceMock.findByFileLike("OK")).thenReturn(generateItems(null));
+	    	
+	    		when(page.getContent()).thenReturn(generateItems(null));
+	    		when(itemServiceMock.findByFileLike("OK", pageable)).thenReturn(page);
 	    		
 	        mockMvc.perform(get(PATH+"/search/title/OK"))
 	        		.andDo(print())
@@ -280,13 +315,15 @@ public class WallControllerUnitTest {
 	        		.andExpect(jsonPath("$[11].file").value("codevideo5"))
 	        		;
 	        
-	        verify(itemServiceMock).findByFileLike("OK");
+	        verify(itemServiceMock).findByFileLike("OK", pageable);
 	        verifyNoMoreInteractions(itemServiceMock);
 	    }
 	    
 	    @Test
 	    public void test_search_title_noResults() throws Exception {
-	    		when(itemServiceMock.findByFileLike("OK")).thenReturn(generateItems(null));
+	    	
+	    		when(page.getContent()).thenReturn(generateItems(null));
+	    		when(itemServiceMock.findByFileLike("OK", pageable)).thenReturn(page);
 	    		//when(itemServiceMock.findByFileLike("KO")).thenReturn(new ArrayList<>());
 	    		
 	        mockMvc.perform(get(PATH+"/search/title/KO"))
@@ -297,13 +334,15 @@ public class WallControllerUnitTest {
 	        		.andExpect(content().string("[]"))
 	        		;
 	        
-	        verify(itemServiceMock).findByFileLike("KO");
+	        verify(itemServiceMock).findByFileLike("KO", pageable);
 	        verifyNoMoreInteractions(itemServiceMock);
 	    }
 	    
 	    @Test
 	    public void test_search_description() throws Exception {
-	    	when(itemServiceMock.findByDescriptionLike(Mockito.eq("a description"))).thenReturn(generateItems(null));
+	    		
+	    		when(page.getContent()).thenReturn(generateItems(null));
+	    		when(itemServiceMock.findByDescriptionLike(Mockito.eq("a description"), pageable)).thenReturn(page);
     		
 	        mockMvc.perform(get(PATH+"/search/description/a description"))
 	        		.andDo(print())
@@ -316,13 +355,14 @@ public class WallControllerUnitTest {
 	        		.andExpect(jsonPath("$[11].file").value("codevideo5"))
 	        		;
 	        
-	        verify(itemServiceMock).findByDescriptionLike("a description");
+	        verify(itemServiceMock).findByDescriptionLike("a description", pageable);
 	        verifyNoMoreInteractions(itemServiceMock);
 	    }
 	    
 	    @Test
 	    public void test_search_description_noResults() throws Exception {
-	    		when(itemServiceMock.findByDescriptionLike(Mockito.eq("a description"))).thenReturn(generateItems(null));
+	    		when(page.getContent()).thenReturn(generateItems(null));
+	    		when(itemServiceMock.findByDescriptionLike(Mockito.eq("a description"), pageable)).thenReturn(page);
 	    		//when(itemServiceMock.findByFileLike("another one")).thenReturn(new ArrayList<>());
 	    		
 	        mockMvc.perform(get(PATH+"/search/description/another one"))
@@ -333,14 +373,15 @@ public class WallControllerUnitTest {
 	        		.andExpect(content().string("[]"))
 	        		;
 	        
-	        verify(itemServiceMock).findByDescriptionLike("another one");
+	        verify(itemServiceMock).findByDescriptionLike("another one", pageable);
 	        verifyNoMoreInteractions(itemServiceMock);
 	    }
 	    
 	    @Test
 	    public void test_search_comments() throws Exception {
-	    	generateItems(null);
-	    	when(commentServiceMock.findByCommentLike(Mockito.eq("a description"))).thenReturn(generateComments());
+	    		generateItems(null);
+	    		when(page.getContent()).thenReturn(generateComments());
+	    		when(commentServiceMock.findByCommentLike(Mockito.eq("a description"), pageable)).thenReturn(page);
     		
 	        mockMvc.perform(get(PATH+"/search/comment/a description"))
 	        		.andDo(print())
@@ -353,13 +394,17 @@ public class WallControllerUnitTest {
 	        		.andExpect(jsonPath("$[11].comment").value("ah ok, it's south africa"))
 	        		;
 	        
-	        verify(commentServiceMock).findByCommentLike("a description");
+	        verify(commentServiceMock).findByCommentLike("a description", pageable);
 	        verifyNoMoreInteractions(commentServiceMock);
 	    }
 	    
 	    @Test
 	    public void test_search_comments_noResults() throws Exception {
 	    		
+	    		//test sans, devrait marcher non?
+	    		//when(page.getContent()).thenReturn(new ArrayList<>());
+	    		//when(commentServiceMock.findByCommentLike(Mockito.eq("a description"), pageable)).thenReturn(page);
+    		
 	        mockMvc.perform(get(PATH+"/search/comment/another one"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
@@ -368,14 +413,15 @@ public class WallControllerUnitTest {
 	        		.andExpect(content().string("[]"))
 	        		;
 	        
-	        verify(commentServiceMock).findByCommentLike("another one");
+	        verify(commentServiceMock).findByCommentLike("another one", pageable);
 	        verifyNoMoreInteractions(commentServiceMock);
 	    }
 	    
 	    @Test
 	    public void test_search_authors() throws Exception {
 	    	generateItems(null);
-	    	when(commentServiceMock.findByAuthorLike(Mockito.eq("an author"))).thenReturn(generateComments());
+	    	when(page.getContent()).thenReturn(generateComments());
+	    	when(commentServiceMock.findByAuthorLike(Mockito.eq("an author"), pageable)).thenReturn(page);
     		
 	        mockMvc.perform(get(PATH+"/search/author/an author"))
 	        		.andDo(print())
@@ -388,13 +434,16 @@ public class WallControllerUnitTest {
 	        		.andExpect(jsonPath("$[11].author").value("Guy Mann"))
 	        		;
 	        
-	        verify(commentServiceMock).findByAuthorLike("an author");
+	        verify(commentServiceMock).findByAuthorLike("an author", pageable);
 	        verifyNoMoreInteractions(commentServiceMock);
 	    }
 	    
 	    @Test
 	    public void test_search_author_noResults() throws Exception {
 	    		
+	    		//when(page.getContent()).thenReturn(new ArrayList<>());
+	    		//when(commentServiceMock.findByAuthorLike(Mockito.eq("an author"), pageable)).thenReturn(page);
+    		
 	        mockMvc.perform(get(PATH+"/search/author/another one"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
@@ -403,7 +452,7 @@ public class WallControllerUnitTest {
 	        		.andExpect(content().string("[]"))
 	        		;
 	        
-	        verify(commentServiceMock).findByAuthorLike("another one");
+	        verify(commentServiceMock).findByAuthorLike("another one", pageable);
 	        verifyNoMoreInteractions(commentServiceMock);
 	    }
 	        

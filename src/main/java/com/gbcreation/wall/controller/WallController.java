@@ -24,11 +24,11 @@ import com.gbcreation.wall.service.ItemService;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-	@RestController
-	@RequestMapping("/api/wall")
-	@Slf4j
-	@Setter
-	public class WallController {
+@RestController
+@RequestMapping("/api/wall")
+@Slf4j
+@Setter
+public class WallController {
 		
 	@Resource
 	private ItemService itemService;
