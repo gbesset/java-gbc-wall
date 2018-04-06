@@ -13,6 +13,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -21,6 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.gbcreation.wall.model.Comment;
@@ -54,12 +58,20 @@ public class CommentServiceTest {
 	private List<Item> items;
 	
 	private List<Comment> comments;
+	
+	Pageable pageable;
+	
+	@Mock
+	Page page;
 
     
     @Before
     public void setUp() {
 	    	items = generateItems();
 	    	comments = generateComments();
+	    	
+	    	
+	    	pageable = new PageRequest(0,20);
     }
 
     
@@ -104,13 +116,14 @@ public class CommentServiceTest {
 	
 	@Test
 	public void test_findAll() {
-		
-		when(commentRepository.findAll()).thenReturn(comments);
-		List<Comment> result = commentService.findAll();
 
-		assertEquals(comments,result);
+		when(page.getContent()).thenReturn(comments);
+		when(commentRepository.findAllByOrderByCreatedAtDesc(pageable)).thenReturn(page);
+		Page<Comment> resultPaged = commentService.retrieveComments(pageable);
 
-		verify(commentRepository).findAll();
+		assertEquals(comments,resultPaged.getContent());
+
+		verify(commentRepository).findAllByOrderByCreatedAtDesc(pageable);
 		verifyNoMoreInteractions(commentRepository);
 	}
 	
@@ -147,57 +160,67 @@ public class CommentServiceTest {
 		Item item = new Item("picture1.jpg","/some/local/folder/","First Picture",ItemType.PICTURE);
 		List<Comment> comments = Arrays.asList(new Comment("Jane Doe", "it's true, ont of your best", item));
 
-		when(commentRepository.findByItemIdIdOrderByCreatedAtDesc(2L)).thenReturn(comments);
-		List<Comment> result = commentService.findByItemIdId(2L);
+		when(page.getContent()).thenReturn(comments);
+		when(commentRepository.findByItemIdIdOrderByCreatedAtDesc(2L, pageable)).thenReturn(page);
+		Page<Comment> resultPaged = commentService.findByItemIdId(2L, pageable);
 
-		assertEquals(comments,result);
+		assertEquals(comments,resultPaged.getContent());
 
-		verify(commentRepository).findByItemIdIdOrderByCreatedAtDesc(2L);
+		verify(commentRepository).findByItemIdIdOrderByCreatedAtDesc(2L, pageable);
 		verifyNoMoreInteractions(commentRepository);
 	}
 
 	@Test
 	public void test_findBy_comment_like() {
 
-		when(commentRepository.findTop100ByCommentContainingIgnoreCaseOrderByCreatedAtDesc("search content")).thenReturn(comments);
+		when(page.getContent()).thenReturn(comments);
+		when(commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("search content", pageable)).thenReturn(page);
 		
-		List<Comment> result = commentService.findByCommentLike("search content");
+		Page<Comment> resultPaged = commentService.findByCommentLike("search content", pageable);
 
-		assertEquals(comments,result);
+		assertEquals(comments,resultPaged.getContent());
 
-		verify(commentRepository).findTop100ByCommentContainingIgnoreCaseOrderByCreatedAtDesc("search content");
+		verify(commentRepository).findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("search content", pageable);
 		verifyNoMoreInteractions(commentRepository);
 	}
 	
 	@Test
 	public void test_findBy_comment_like_noResults() {
-		List<Comment> result = commentService.findByCommentLike("search content");
+		when(page.getContent()).thenReturn(new ArrayList<>());
+		when(commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("search content", pageable)).thenReturn(page);
+		
+		Page<Comment> resultPaged = commentService.findByCommentLike("search content", pageable);
 
-		assertEquals(Arrays.asList(),result);
+		assertEquals(Arrays.asList(),resultPaged.getContent());
 
-		verify(commentRepository).findTop100ByCommentContainingIgnoreCaseOrderByCreatedAtDesc("search content");
+		verify(commentRepository).findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("search content", pageable);
 		verifyNoMoreInteractions(commentRepository);
 	}
 
 	@Test
 	public void test_findBy_Author_like() {
-		when(commentRepository.findTop100ByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("search content")).thenReturn(comments);
+		when(page.getContent()).thenReturn(comments);
+		when(commentRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("search content", pageable)).thenReturn(page);
 		
-		List<Comment> result = commentService.findByAuthorLike("search content");
+		Page<Comment> resultPaged = commentService.findByAuthorLike("search content", pageable);
 
-		assertEquals(comments,result);
+		assertEquals(comments,resultPaged.getContent());
 
-		verify(commentRepository).findTop100ByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("search content");
+		verify(commentRepository).findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("search content", pageable);
 		verifyNoMoreInteractions(commentRepository);
 	}
 
 	@Test
 	public void test_findBy_Author_like_noResults() {
-		List<Comment> result = commentService.findByAuthorLike("search content");
+		when(page.getContent()).thenReturn(new ArrayList<>());
+		when(commentRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("search content", pageable)).thenReturn(page);
+		
+		
+		Page<Comment> resultPaged = commentService.findByAuthorLike("search content", pageable);
 
-		assertEquals(Arrays.asList(),result);
+		assertEquals(Arrays.asList(),resultPaged.getContent());
 
-		verify(commentRepository).findTop100ByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("search content");
+		verify(commentRepository).findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("search content", pageable);
 		verifyNoMoreInteractions(commentRepository);
 	}
 	

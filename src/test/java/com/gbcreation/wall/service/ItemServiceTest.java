@@ -3,7 +3,6 @@ package com.gbcreation.wall.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -19,20 +18,22 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.PowerMockRunnerDelegate;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.gbcreation.wall.model.Item;
 import com.gbcreation.wall.model.ItemType;
@@ -63,12 +64,25 @@ public class ItemServiceTest {
 		private List<Item> itemsP;
 
 		private List<Item> itemsV;
-	    
+		
+		private Pageable pageable;
+		
+		@Mock
+		Page page;
+
+		@Mock
+		Page pageP;
+		
+		@Mock
+		Page pageV;
+		
 	    @Before
 	    public void setUp() {
 		    	items = generateItems();
 		    	itemsP = items.stream().filter(i-> i.getType().equals(ItemType.PICTURE)).collect(Collectors.toList());
 		    	itemsV = items.stream().filter(i-> i.getType().equals(ItemType.VIDEO) ||i.getType().equals(ItemType.VIDEO_YOUTUBE) || i.getType().equals(ItemType.VIDEO_VIMEO)).collect(Collectors.toList());
+		    	
+		    	pageable = new PageRequest(0,20);
 	    }
 
 	    
@@ -161,24 +175,26 @@ public class ItemServiceTest {
 	    public void test_findBy_title_like() {
 	    		Item item = new Item("test-picture-001", "/some/local/path/", "this is a beautiful picture",ItemType.PICTURE);
 
-	    		when(itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("picture")).thenReturn(Arrays.asList(item));
-		    	List<Item> result = itemService.findByFileLike("picture");
+	    		when(page.getContent()).thenReturn(Arrays.asList(item));
+	    		when(itemRepository.findByFileContainingIgnoreCaseOrderByCreatedAtDesc("picture", pageable)).thenReturn(page);
+		    	Page<Item> resultPaged = itemService.findByFileLike("picture", pageable);
 	
-		    	assertEquals(1,result.size());
-		    	assertEquals(item,result.get(0));
+		    	assertEquals(1,resultPaged.getContent().size());
+		    	assertEquals(item,resultPaged.getContent().get(0));
 	
-		    	verify(itemRepository).findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("picture");
+		    	verify(itemRepository).findByFileContainingIgnoreCaseOrderByCreatedAtDesc("picture", pageable);
 		    	verifyNoMoreInteractions(itemRepository);
 	    }
 	    
 	    @Test
 	    public void test_findBy_title_like_noResults() {
-	    		when(itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc(Mockito.anyString())).thenReturn(new ArrayList<>());
-		    	List<Item> result = itemService.findByFileLike("picture");
+	    		when(page.getContent()).thenReturn(new ArrayList<>());
+	    		when(itemRepository.findByFileContainingIgnoreCaseOrderByCreatedAtDesc("picture", pageable)).thenReturn(page);
+		    	Page<Item> resultPaged = itemService.findByFileLike("picture", pageable);
 	
-		    	assertEquals(0,result.size());
+		    	assertEquals(0,resultPaged.getContent().size());
 	
-		    	verify(itemRepository).findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("picture");
+		    	verify(itemRepository).findByFileContainingIgnoreCaseOrderByCreatedAtDesc("picture", pageable);
 		    	verifyNoMoreInteractions(itemRepository);
 	    }
 	    
@@ -186,94 +202,85 @@ public class ItemServiceTest {
 	    public void test_findBy_description_like() {
 	    		Item item = new Item("test-picture-001", "/some/local/path/", "this is a beautiful picture",ItemType.PICTURE);
 
-	    		when(itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("beautiful")).thenReturn(Arrays.asList(item));
-		    	List<Item> result = itemService.findByFileLike("beautiful");
+	    		when(page.getContent()).thenReturn(Arrays.asList(item));
+	    		when(itemRepository.findByDescriptionContainingIgnoreCaseOrderByCreatedAtDesc("beautiful", pageable)).thenReturn(page);
+		    	Page<Item> resultPaged = itemService.findByDescriptionLike("beautiful", pageable);
 	
-		    	assertEquals(1,result.size());
-		    	assertEquals(item,result.get(0));
+		    	assertEquals(1,resultPaged.getContent().size());
+		    	assertEquals(item,resultPaged.getContent().get(0));
 	
-		    	verify(itemRepository, times(1)).findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("beautiful");
+		    	verify(itemRepository, times(1)).findByDescriptionContainingIgnoreCaseOrderByCreatedAtDesc("beautiful", pageable);
 		    	verifyNoMoreInteractions(itemRepository);
 	    }
 	    
 	    @Test
 	    public void test_findBy_description_like_noResults() {
 
-	    		when(itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("beautiful")).thenReturn(new ArrayList<>());
+	    		when(page.getContent()).thenReturn(new ArrayList<>());
+	    		when(itemRepository.findByDescriptionContainingIgnoreCaseOrderByCreatedAtDesc("beautiful", pageable)).thenReturn(page);
 		    	
-	    		List<Item> result = itemService.findByFileLike("beautiful");
+	    		Page<Item> resultPaged = itemService.findByDescriptionLike("beautiful", pageable);
 	
-		    	assertEquals(0,result.size());
-		    	verify(itemRepository, times(1)).findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("beautiful");
+		    	assertEquals(0,resultPaged.getContent().size());
+		    	verify(itemRepository, times(1)).findByDescriptionContainingIgnoreCaseOrderByCreatedAtDesc("beautiful", pageable);
 		    	verifyNoMoreInteractions(itemRepository);
 	    }
 	    
 	    @Test
 	    public void test_retrieve_all_items() {
-	    	 	ArgumentCaptor<Sort> sortArgument = ArgumentCaptor.forClass(Sort.class);
 	    	 
-		    	when(itemRepository.findAll(any(Sort.class))).thenReturn(items);
-		    	when(itemRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(itemsP);
-		    	when(itemRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(itemsV);
+	    	 	when(page.getContent()).thenReturn(items);
+	    	 	when(pageP.getContent()).thenReturn(itemsP);
+	    	 	when(pageV.getContent()).thenReturn(itemsV);
+		    	when(itemRepository.findAllByOrderByCreatedAtDesc(pageable)).thenReturn(page);
+		    	when(itemRepository.findAllByTypeInOrderByCreatedAtDesc(any(List.class), any(Pageable.class))).thenReturn(pageP);
+		    	when(itemRepository.findAllByTypeInOrderByCreatedAtDesc(any(List.class), any(Pageable.class))).thenReturn(pageV);
 	    	
-		    	List<Item> result = itemService.retrieveAllItems();
+		    	Page<Item> resultPaged = itemService.retrieveItems(pageable);
 	
-		    	assertEquals(result.size(),items.size());
+		    	assertEquals(resultPaged.getContent().size(),items.size());
 	
-		    	verify(itemRepository).findAll(sortArgument.capture());
+		    	verify(itemRepository).findAllByOrderByCreatedAtDesc(pageable);
 		    	verifyNoMoreInteractions(itemRepository);
 	     }
 	    
 	    @Test
 	    public void test_retrieve_all_pictures() {
-
-	    		// Methodes static -> powerMockito
-    			Specification<Item> specPicture = ItemFilterSpecifications.isItemPicture();
-    			Specification<Item> specVideo = ItemFilterSpecifications.isItemVideo();	
-    			
-    			PowerMockito.mockStatic(ItemFilterSpecifications.class);
-    			PowerMockito.when(ItemFilterSpecifications.isItemPicture()).thenReturn(specPicture);
-    			PowerMockito.when(ItemFilterSpecifications.isItemVideo()).thenReturn(specVideo);
-			
-		    	when(itemRepository.findAll(any(Sort.class))).thenReturn(items);
-		    	when(itemRepository.findAll(Mockito.eq(specPicture), any(Sort.class))).thenReturn(itemsP);
-		    	when(itemRepository.findAll(Mockito.eq(specVideo), any(Sort.class))).thenReturn(itemsV);
+    					
+		    	when(page.getContent()).thenReturn(items);
+	    	 	when(pageP.getContent()).thenReturn(itemsP);
+	    	 	when(pageV.getContent()).thenReturn(itemsV);
+		    	when(itemRepository.findAllByOrderByCreatedAtDesc(pageable)).thenReturn(page);
+		    	when(itemRepository.findAllByTypeInOrderByCreatedAtDesc(Mockito.eq(Arrays.asList(ItemType.PICTURE)), any(Pageable.class))).thenReturn(pageP);
+		    	when(itemRepository.findAllByTypeInOrderByCreatedAtDesc(Mockito.eq(Arrays.asList(ItemType.VIDEO_YOUTUBE)), any(Pageable.class))).thenReturn(pageV);
 		    	
-		    	List<Item> result = itemService.retrieveAllPictures();
-		    	assertEquals(result.size(),7);
-		    	assertEquals(result.size(),itemsP.size());
-		    	assertEquals(result.get(0).getType(),ItemType.PICTURE);
+		    	Page<Item> resultPaged = itemService.retrievePictures(pageable);
+		    	assertEquals(resultPaged.getContent().size(),7);
+		    	assertEquals(resultPaged.getContent().size(),itemsP.size());
+		    	assertEquals(resultPaged.getContent().get(0).getType(),ItemType.PICTURE);
 
-		    	verify(itemRepository).findAll(Mockito.eq(specPicture),any(Sort.class));
-		    
-		    	//erreur bizarre...?
-		    	//PowerMockito.verifyStatic();
+		    	verify(itemRepository).findAllByTypeInOrderByCreatedAtDesc(Arrays.asList(ItemType.PICTURE), pageable);
 		    	verifyNoMoreInteractions(itemRepository);
 	     }
 	    
 	    @Test
 	    public void test_retrieve_all_videos() {
-	    	// Methodes static -> powerMockito
-			Specification<Item> specPicture = ItemFilterSpecifications.isItemPicture();
-			Specification<Item> specVideo = ItemFilterSpecifications.isItemVideo();	
-			
-			PowerMockito.mockStatic(ItemFilterSpecifications.class);
-			PowerMockito.when(ItemFilterSpecifications.isItemPicture()).thenReturn(specPicture);
-			PowerMockito.when(ItemFilterSpecifications.isItemVideo()).thenReturn(specVideo);
-		
-		    	when(itemRepository.findAll(any(Sort.class))).thenReturn(items);
-		    	when(itemRepository.findAll(Mockito.eq(specPicture), any(Sort.class))).thenReturn(itemsP);
-		    	when(itemRepository.findAll(Mockito.eq(specVideo), any(Sort.class))).thenReturn(itemsV);
+	      	when(page.getContent()).thenReturn(items);
+	    	 	when(pageP.getContent()).thenReturn(itemsP);
+	    	 	when(pageV.getContent()).thenReturn(itemsV);
+		    	when(itemRepository.findAllByOrderByCreatedAtDesc(pageable)).thenReturn(page);
+		    	when(itemRepository.findAllByTypeInOrderByCreatedAtDesc(Mockito.eq(Arrays.asList(ItemType.PICTURE)), any(Pageable.class))).thenReturn(pageP);
+		    	when(itemRepository.findAllByTypeInOrderByCreatedAtDesc(Mockito.eq(Arrays.asList(ItemType.VIDEO, ItemType.VIDEO_VIMEO, ItemType.VIDEO_YOUTUBE)), any(Pageable.class))).thenReturn(pageV);
 	    	
-		    	List<Item> result = itemService.retrieveAllVideos();
+		    	Page<Item> resultPaged = itemService.retrieveVideos(pageable);
 	
-		    	assertEquals(result.size(),5);
-		    assertEquals(result.size(),itemsV.size());
-		    	assertEquals(result.get(0).getType(),ItemType.VIDEO);
-		    	assertEquals(result.get(1).getType(),ItemType.VIDEO_YOUTUBE);
-		    	assertEquals(result.get(2).getType(),ItemType.VIDEO_VIMEO);
+		    	assertEquals(resultPaged.getContent().size(),5);
+		    assertEquals(resultPaged.getContent().size(),itemsV.size());
+		    	assertEquals(resultPaged.getContent().get(0).getType(),ItemType.VIDEO);
+		    	assertEquals(resultPaged.getContent().get(1).getType(),ItemType.VIDEO_YOUTUBE);
+		    	assertEquals(resultPaged.getContent().get(2).getType(),ItemType.VIDEO_VIMEO);
 	
-		    	verify(itemRepository).findAll(Mockito.eq(specVideo),any(Sort.class));
+		    	verify(itemRepository).findAllByTypeInOrderByCreatedAtDesc(Arrays.asList(ItemType.VIDEO, ItemType.VIDEO_VIMEO, ItemType.VIDEO_YOUTUBE), pageable);
 		    	verifyNoMoreInteractions(itemRepository);
 	     }
 	    
