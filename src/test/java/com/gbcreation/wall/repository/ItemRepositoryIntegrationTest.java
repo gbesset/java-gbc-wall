@@ -12,6 +12,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalField;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -47,10 +48,12 @@ public class ItemRepositoryIntegrationTest {
 	 @Autowired
 	 private ItemRepository itemRepository;
 	 
+	 private Pageable pageable;
+	 
 	 @Before
 	 public void setup() {
 		 itemRepository.deleteAll();
-		 
+		 pageable = new PageRequest(0,20);
 		 //set up data scenario
 		 //Item item = new It..getClass().
 		 //entityManager.persist(item);
@@ -126,24 +129,24 @@ public class ItemRepositoryIntegrationTest {
 		 List<Item> results = itemRepository.findByFileOrderByCreatedAtDesc("codevideo2");
 		 assertEquals("codevideo2", results.get(0).getFile());
 		 
-		 results = itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc("codev");
-		 assertEquals(5, results.size());
-		 assertEquals("codevideo5", results.get(0).getFile());
-		 assertEquals("codevideo4", results.get(1).getFile());
-		 assertEquals("codevideo1", results.get(4).getFile());
+		 Page<Item >resultsPaged = itemRepository.findByFileContainingIgnoreCaseOrderByCreatedAtDesc("codev",pageable);
+		 assertEquals(5, resultsPaged.getContent().size());
+		 assertEquals("codevideo5", resultsPaged.getContent().get(0).getFile());
+		 assertEquals("codevideo4", resultsPaged.getContent().get(1).getFile());
+		 assertEquals("codevideo1", resultsPaged.getContent().get(4).getFile());
 		 
-		 results = itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc(".png");
-		 assertEquals(2, results.size());
-		 assertEquals("picture5.png", results.get(0).getFile());
-		 assertEquals("picture2.png", results.get(1).getFile());
+		 resultsPaged = itemRepository.findByFileContainingIgnoreCaseOrderByCreatedAtDesc(".png",pageable);
+		 assertEquals(2, resultsPaged.getContent().size());
+		 assertEquals("picture5.png", resultsPaged.getContent().get(0).getFile());
+		 assertEquals("picture2.png", resultsPaged.getContent().get(1).getFile());
 		 
-		 results = itemRepository.findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc(".PnG");
-		 assertEquals(2, results.size());
-		 assertEquals("picture5.png", results.get(0).getFile());
-		 assertEquals("picture2.png", results.get(1).getFile());
+		 resultsPaged = itemRepository.findByFileContainingIgnoreCaseOrderByCreatedAtDesc(".PnG",pageable);
+		 assertEquals(2, resultsPaged.getContent().size());
+		 assertEquals("picture5.png", resultsPaged.getContent().get(0).getFile());
+		 assertEquals("picture2.png", resultsPaged.getContent().get(1).getFile());
 		 
-		 results = itemRepository.findByFileMyRqt("codevideo2");
-		 assertEquals("codevideo2", results.get(0).getFile());
+		 //results = itemRepository.findByFileMyRqt("codevideo2");
+		 //assertEquals("codevideo2", results.get(0).getFile());
 	 }
 	 
 	 @Test
@@ -215,11 +218,6 @@ public class ItemRepositoryIntegrationTest {
 		 assertEquals(1, itemRepository.findAll(ItemFilterSpecifications.periodFromTo(convertLocalDateToDate(currentYearSomeDaysBefore),convertLocalDateToDate(LocalDate.of(2018, 4, 2)))).size());
 	  }
 	 
-	 @Test
-	  public void test_filtering_on_nb_like() {
-		 fail("not yet implemented");
-	  }
-	 
 	 
 	  @Test
 	  public void test_paginate() {
@@ -232,16 +230,16 @@ public class ItemRepositoryIntegrationTest {
 		    Sort sort = new Sort(new Sort.Order(Direction.DESC, "file"));
 		    Pageable pageable = new PageRequest(0, 5, sort);
 
-		    List<Item> itemFound = itemRepository.findByDescriptionContaining("Picture", pageable);
-		    assertEquals(5, itemFound.size());
-		    assertEquals("picture7.jpg", itemFound.get(0).getFile());
-		    assertEquals("picture3", itemFound.get(4).getFile());
+		    Page<Item> itemFoundPaged = itemRepository.findByDescriptionContainingIgnoreCaseOrderByCreatedAtDesc("Picture", pageable);
+		    assertEquals(5, itemFoundPaged.getContent().size());
+		    assertEquals("picture7.jpg", itemFoundPaged.getContent().get(0).getFile());
+		    assertEquals("picture3", itemFoundPaged.getContent().get(4).getFile());
 
 		    pageable = new PageRequest(1, 5, sort);
-		    itemFound = itemRepository.findByDescriptionContaining("Picture", pageable);
-		    assertEquals(2, itemFound.size());
-		    assertEquals("picture2.png", itemFound.get(0).getFile());
-		    assertEquals("picture1.jpg", itemFound.get(1).getFile());
+		    itemFoundPaged = itemRepository.findByDescriptionContainingIgnoreCaseOrderByCreatedAtDesc("Picture", pageable);
+		    assertEquals(2, itemFoundPaged.getContent().size());
+		    assertEquals("picture2.png", itemFoundPaged.getContent().get(0).getFile());
+		    assertEquals("picture1.jpg", itemFoundPaged.getContent().get(1).getFile());
 			 
 			
 		    //find all
@@ -266,29 +264,27 @@ public class ItemRepositoryIntegrationTest {
 		    Sort sort = new Sort(new Sort.Order(Direction.DESC, "file"));
 		    Pageable pageable = new PageRequest(0, 5, sort);
 
-		    //find by images by description
-		    //todo
-		    fail("not yet implemented");
-			
-		    //find all images
-		    // 2ère page de résultats ; 3 résultats max par page.
-		    Page<Item> allItemPaginated = itemRepository.findAll(ItemFilterSpecifications.isItemPicture(),new PageRequest(2, 3));
+		     //find all images
+		    // 3ième page de résultats ; 3 résultats max par page.
+		    Page<Item> allItemPaginated = itemRepository.findAllByTypeInOrderByCreatedAtDesc(Arrays.asList(ItemType.PICTURE),new PageRequest(2, 3));
 		 
 		    assertEquals(2, allItemPaginated.getNumber());
 		    assertEquals(3, allItemPaginated.getSize()); 				// la taille de la pagination
 		    assertEquals(7, allItemPaginated.getTotalElements()); 	//nb total d'éléments récupérables
 		    assertEquals(3, allItemPaginated.getTotalPages()); 		// nombre de pages total
 		    assertTrue(allItemPaginated.hasContent());
+		    assertEquals(allItemPaginated.getContent().size(),1);
 		    
 		    //find all videos
-		    // 2ère page de résultats ; 3 résultats max par page.
-		    allItemPaginated = itemRepository.findAll(ItemFilterSpecifications.isItemVideo(),new PageRequest(2, 3));
+		    // 2ièmmee page de résultats ; 3 résultats max par page.
+		    allItemPaginated = itemRepository.findAllByTypeInOrderByCreatedAtDesc(Arrays.asList(ItemType.VIDEO_YOUTUBE),new PageRequest(1, 3));
 		 
-		    assertEquals(2, allItemPaginated.getNumber());
-		    assertEquals(2, allItemPaginated.getSize()); 				// la taille de la pagination
+		    assertEquals(1, allItemPaginated.getNumber());
+		    assertEquals(3, allItemPaginated.getSize()); 				// la taille de la pagination
 		    assertEquals(5, allItemPaginated.getTotalElements()); 	//nb total d'éléments récupérables
 		    assertEquals(2, allItemPaginated.getTotalPages()); 		// nombre de pages total
 		    assertTrue(allItemPaginated.hasContent());
+		    assertEquals(allItemPaginated.getContent().size(),2);
 	  }
 	  
 	  public int iterableSize(Iterable<Item> it){

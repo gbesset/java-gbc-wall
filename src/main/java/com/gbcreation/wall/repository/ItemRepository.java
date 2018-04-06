@@ -14,26 +14,18 @@ import com.gbcreation.wall.model.ItemType;
 //This will be AUTO IMPLEMENTED by Spring into a Bean called itemRepository
 public interface ItemRepository extends PagingAndSortingRepository<Item,Long>, JpaSpecificationExecutor{
 	
-	//virer !!
-	List<Item> findByFileOrderByCreatedAtDesc(String file);
-	List<Item> findTop100ByFileContainingIgnoreCaseOrderByCreatedAtDesc(String file);
-	
-	//contains description <=> @Query("Select i from Item i where i.descriptio, like %:description%").
-	//List<Item> findByDescriptionContaining(String description);
-	
-	
-	//Pour info et voir rqt
-	@Query("from Item it where it.file = ?1")
-	@Deprecated
-	List<Item> findByFileMyRqt(String file);
-
-	
 	//Attention au by  findAll BY  order....
 	Page<Item> findAllByOrderByCreatedAtDesc(Pageable pageable);
 	Page<Item> findAllByTypeInOrderByCreatedAtDesc(List<ItemType> types, Pageable pageable);
 	Page<Item> findByFileContainingIgnoreCaseOrderByCreatedAtDesc(String file, Pageable pageable);
 	Page<Item> findByDescriptionContainingIgnoreCaseOrderByCreatedAtDesc(String file, Pageable pageable);
+		
+	List<Item> findByFileOrderByCreatedAtDesc(String file);
 	
-	// Renvoie un résultat paginé avec des méta-données sur la recherche (nombre de pages, etc.)
-	List<Item> findByDescriptionContaining(String description, Pageable pageable);
+	//contains description <=> @Query("Select i from Item i where i.descriptio, like %:description%").
+	//List<Item> findByDescriptionContaining(String description);
+	
+	//Pour info et voir rqt
+	//@Query("from Item it where it.file = ?1")
+	//List<Item> findByFileMyRqt(String file);
 }

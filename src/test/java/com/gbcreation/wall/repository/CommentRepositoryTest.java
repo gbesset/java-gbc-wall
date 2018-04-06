@@ -12,6 +12,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.gbcreation.wall.model.Comment;
@@ -32,8 +35,12 @@ public class CommentRepositoryTest {
 	 
 	 private Item item2;
 	 
+	 private Pageable pageable;
+	 
 	 @Before
 	 public void setup() {
+		 pageable = new PageRequest(0,20);;
+		 
 		 commentRepository.deleteAll();
 		 
 		 item1 = new Item("picture1.jpg","/some/local/folder/","First Picture",ItemType.PICTURE);
@@ -150,18 +157,18 @@ public class CommentRepositoryTest {
 		 
 		 assertEquals(15,commentRepository.count());
 		 
-		 List<Comment> results = commentRepository.findByItemIdIdOrderByCreatedAtDesc(item1.getId());
-		 assertEquals(10, results.size());
-		 assertEquals(" no ideas comm13.1 love it!", results.get(0).getComment());
-		 assertEquals(" country - comm1 love it!", results.get(9).getComment());
+		 Page<Comment> resultsPaged = commentRepository.findByItemIdIdOrderByCreatedAtDesc(item1.getId(),pageable);
+		 assertEquals(10, resultsPaged.getContent().size());
+		 assertEquals(" no ideas comm13.1 love it!", resultsPaged.getContent().get(0).getComment());
+		 assertEquals(" country - comm1 love it!", resultsPaged.getContent().get(9).getComment());
 		  
-		 results = commentRepository.findByItemIdIdOrderByCreatedAtDesc(43l);
-		 assertEquals(0, results.size());
+		 resultsPaged = commentRepository.findByItemIdIdOrderByCreatedAtDesc(43l,pageable);
+		 assertEquals(0, resultsPaged.getContent().size());
 		 
-		 results = commentRepository.findByItemIdIdOrderByCreatedAtDesc(item2.getId());
-		 assertEquals(5, results.size());
-		 assertEquals(" great comm15.2 love it!", results.get(0).getComment());
-		 assertEquals(" POOL - comm7.2 love it!", results.get(4).getComment());
+		 resultsPaged = commentRepository.findByItemIdIdOrderByCreatedAtDesc(item2.getId(),pageable);
+		 assertEquals(5, resultsPaged.getContent().size());
+		 assertEquals(" great comm15.2 love it!", resultsPaged.getContent().get(0).getComment());
+		 assertEquals(" POOL - comm7.2 love it!", resultsPaged.getContent().get(4).getComment());
 		
 	  }
 	 
@@ -173,31 +180,31 @@ public class CommentRepositoryTest {
 		 
 		 assertEquals(15,commentRepository.count());
 		 
-		 List<Comment> results = commentRepository.findTop100ByCommentContainingIgnoreCaseOrderByCreatedAtDesc("comm7.2");
-		 assertEquals(" POOL - comm7.2 love it!", results.get(0).getComment());
+		 Page<Comment> resultsPaged = commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("comm7.2", pageable);
+		 assertEquals(" POOL - comm7.2 love it!", resultsPaged.getContent().get(0).getComment());
 		 
-		 results = commentRepository.findTop100ByCommentContainingIgnoreCaseOrderByCreatedAtDesc("cOMm7.2");
-		 assertEquals(" POOL - comm7.2 love it!", results.get(0).getComment());
+		 resultsPaged = commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("cOMm7.2", pageable);
+		 assertEquals(" POOL - comm7.2 love it!", resultsPaged.getContent().get(0).getComment());
 		 
-		 results = commentRepository.findTop100ByCommentContainingIgnoreCaseOrderByCreatedAtDesc("country");
-		 assertEquals(3, results.size());
-		 assertEquals(" coUNtry - comm6 love it!", results.get(0).getComment());
-		 assertEquals(" country - comm3 love it!", results.get(1).getComment());
-		 assertEquals(" country - comm1 love it!", results.get(2).getComment());
+		 resultsPaged = commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("country", pageable);
+		 assertEquals(3, resultsPaged.getContent().size());
+		 assertEquals(" coUNtry - comm6 love it!", resultsPaged.getContent().get(0).getComment());
+		 assertEquals(" country - comm3 love it!", resultsPaged.getContent().get(1).getComment());
+		 assertEquals(" country - comm1 love it!", resultsPaged.getContent().get(2).getComment());
 		 
-		 results = commentRepository.findTop100ByCommentContainingIgnoreCaseOrderByCreatedAtDesc("CounTRy");
-		 assertEquals(3, results.size());
-		 assertEquals(" coUNtry - comm6 love it!", results.get(0).getComment());
-		 assertEquals(" country - comm3 love it!", results.get(1).getComment());
-		 assertEquals(" country - comm1 love it!", results.get(2).getComment());
+		 resultsPaged = commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("CounTRy", pageable);
+		 assertEquals(3, resultsPaged.getContent().size());
+		 assertEquals(" coUNtry - comm6 love it!", resultsPaged.getContent().get(0).getComment());
+		 assertEquals(" country - comm3 love it!", resultsPaged.getContent().get(1).getComment());
+		 assertEquals(" country - comm1 love it!", resultsPaged.getContent().get(2).getComment());
 		 
-		 results = commentRepository.findTop100ByCommentContainingIgnoreCaseOrderByCreatedAtDesc(".2");
-		 assertEquals(5, results.size());
-		 assertEquals(" great comm15.2 love it!", results.get(0).getComment());
-		 assertEquals(" almost done comm14.2 love it!", results.get(1).getComment());
-		 assertEquals(" done comm11.2 love it!", results.get(2).getComment());
-		 assertEquals(" ok comm10.2 love it!", results.get(3).getComment());
-		 assertEquals(" POOL - comm7.2 love it!", results.get(4).getComment());
+		 resultsPaged = commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc(".2", pageable);
+		 assertEquals(5, resultsPaged.getContent().size());
+		 assertEquals(" great comm15.2 love it!", resultsPaged.getContent().get(0).getComment());
+		 assertEquals(" almost done comm14.2 love it!", resultsPaged.getContent().get(1).getComment());
+		 assertEquals(" done comm11.2 love it!", resultsPaged.getContent().get(2).getComment());
+		 assertEquals(" ok comm10.2 love it!", resultsPaged.getContent().get(3).getComment());
+		 assertEquals(" POOL - comm7.2 love it!", resultsPaged.getContent().get(4).getComment());
 	  }
 	 
 	 @Test
@@ -208,24 +215,24 @@ public class CommentRepositoryTest {
 		 
 		 assertEquals(15,commentRepository.count());
 		 
-		 List<Comment> results = commentRepository.findTop100ByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("Author3");
-		 assertEquals(2, results.size());
-		 assertEquals(" coUNtry - comm6 love it!", results.get(0).getComment());
-		 assertEquals(" country - comm3 love it!", results.get(1).getComment());
+		 Page<Comment> resultsPaged = commentRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("Author3", pageable);
+		 assertEquals(2, resultsPaged.getContent().size());
+		 assertEquals(" coUNtry - comm6 love it!", resultsPaged.getContent().get(0).getComment());
+		 assertEquals(" country - comm3 love it!", resultsPaged.getContent().get(1).getComment());
 		 
 		 
-		 results = commentRepository.findTop100ByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("thor");
-		 assertEquals(15, results.size());
+		 resultsPaged = commentRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("thor", pageable);
+		 assertEquals(15, resultsPaged.getContent().size());
 		 
-		 results = commentRepository.findTop100ByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("tHOr");
-		 assertEquals(15, results.size());
+		 resultsPaged = commentRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("tHOr", pageable);
+		 assertEquals(15, resultsPaged.getContent().size());
 		 
-		 results = commentRepository.findTop100ByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("2");
-		 assertEquals(4, results.size());
-		 assertEquals(" almost done comm14.2 love it!", results.get(0).getComment());
-		 assertEquals(" what to say comm12.1 love it!", results.get(1).getComment());
-		 assertEquals(" POOL - comm7.2 love it!", results.get(2).getComment());
-		 assertEquals(" mountain - comm2 love it!", results.get(3).getComment());
+		 resultsPaged = commentRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("2", pageable);
+		 assertEquals(4, resultsPaged.getContent().size());
+		 assertEquals(" almost done comm14.2 love it!", resultsPaged.getContent().get(0).getComment());
+		 assertEquals(" what to say comm12.1 love it!", resultsPaged.getContent().get(1).getComment());
+		 assertEquals(" POOL - comm7.2 love it!", resultsPaged.getContent().get(2).getComment());
+		 assertEquals(" mountain - comm2 love it!", resultsPaged.getContent().get(3).getComment());
 	  }
 
 
