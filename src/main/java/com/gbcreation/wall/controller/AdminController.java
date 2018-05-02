@@ -2,6 +2,7 @@ package com.gbcreation.wall.controller;
 
 import javax.annotation.Resource;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/admin")
 @Slf4j
+@CrossOrigin(origins = {"http://localhost:4200", "http://k.g.gbcreation.fr"})
 public class AdminController {
 
 	@Resource

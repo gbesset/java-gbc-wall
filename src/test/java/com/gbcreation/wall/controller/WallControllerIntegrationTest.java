@@ -57,10 +57,10 @@ public class WallControllerIntegrationTest {
 		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk())
 		.andDo(print())
-		.andExpect(jsonPath("$.count-all").value(28))
-		.andExpect(jsonPath("$.count-pictures").value(26))
-		.andExpect(jsonPath("$.count-videos").value(2))
-		.andExpect(jsonPath("$.count-comments").value(4))
+		.andExpect(jsonPath("$.all").value(28))
+		.andExpect(jsonPath("$.pictures").value(26))
+		.andExpect(jsonPath("$.videos").value(2))
+		.andExpect(jsonPath("$.comments").value(4))
 		;
 	}
 	

@@ -1,16 +1,17 @@
 package com.gbcreation.wall.controller;
 
+import java.time.Instant;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/wall")
+@CrossOrigin(origins = {"http://localhost:4200", "http://k.g.gbcreation.fr"})
 @Slf4j
 @Setter
 public class WallController {
@@ -36,14 +38,32 @@ public class WallController {
 	@Resource
 	private CommentService commentService;
 
+	
+	@RequestMapping(value="/login",method=RequestMethod.POST, produces=MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody Map<String,String> login(@RequestBody String user) {
+		log.info("WallController: login -->{}",user);
+		Map<String,String> response = new HashMap<>();
+		
+		//En attendant mise en place spring security et JWT
+		if("gbe@fr".equals(user)) {
+			response.put("avaibility", Instant.now().toString());
+			response.put("status", "connected");
+		}
+		else {
+			response.put("msg", "user not found");
+		}
+		return response;
+	}
+	
+	
 	@RequestMapping(value="/count",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Map<String,Long> count() {
 		log.info("WallController: count items");
 		Map<String,Long> count=new HashMap<>();
-		count.put("count-all", itemService.countAll());
-		count.put("count-pictures", itemService.countPictures());
-		count.put("count-videos", itemService.countVideos());
-		count.put("count-comments", commentService.countAll());
+		count.put("all", itemService.countAll());
+		count.put("pictures", itemService.countPictures());
+		count.put("videos", itemService.countVideos());
+		count.put("comments", commentService.countAll());
 		return count;
 	}
 	

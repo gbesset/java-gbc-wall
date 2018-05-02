@@ -78,10 +78,10 @@ public class WallControllerUnitTest {
 		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.count-all").value(12))
-		.andExpect(jsonPath("$.count-pictures").value(7))
-		.andExpect(jsonPath("$.count-videos").value(5))
-		.andExpect(jsonPath("$.count-comments").value(15))
+		.andExpect(jsonPath("$.all").value(12))
+		.andExpect(jsonPath("$.pictures").value(7))
+		.andExpect(jsonPath("$.videos").value(5))
+		.andExpect(jsonPath("$.comments").value(15))
 		;
 		
 		verify(itemServiceMock).countAll();
