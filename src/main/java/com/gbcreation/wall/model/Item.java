@@ -62,7 +62,8 @@ public class Item {
 	@Enumerated(EnumType.STRING)
 	private ItemType type;
 	
-	@JsonManagedReference
+	//@JsonManagedReference is the forward part of reference – the one that gets serialized normally. 
+	//mais Pb deserialisation sur admin/add-> OK.  Aultre alternative :  avec @jsonIgnore ds comment...
 	@OneToMany(mappedBy="itemId")
 	private Collection<Comment> comments;
 	

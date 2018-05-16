@@ -1,5 +1,6 @@
 package com.gbcreation.wall.service;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -64,13 +65,15 @@ public class CommentServiceImpl implements CommentService {
 	}
 
 	@Override
-	public void addComment(Comment c) {
-		commentRepository.save(c);
+	public Comment addComment(Comment c) {
+		return commentRepository.save(c);
 	}
 
 	@Override
 	public Comment updateComment(Comment c) {
-		return commentRepository.save(c);
+		Comment cUpdated= commentRepository.save(c);
+		cUpdated.setUpdatedAt(new Date());
+		return cUpdated;
 	}
 
 	@Override

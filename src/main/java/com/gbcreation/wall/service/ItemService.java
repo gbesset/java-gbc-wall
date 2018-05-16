@@ -25,7 +25,7 @@ public interface ItemService {
 	
 	
 	//Pour l'administration
-	void addItem(Item i);
+	Item addItem(Item i);
 	Item updateItem(Item i);
 	void deleteItem(Item i);
 	

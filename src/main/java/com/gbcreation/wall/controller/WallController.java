@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gbcreation.wall.controller.exception.ItemNotFoundException;
 import com.gbcreation.wall.model.Comment;
 import com.gbcreation.wall.model.Item;
 import com.gbcreation.wall.service.CommentService;
@@ -130,6 +131,19 @@ public class WallController {
 		return commentService.findByItemIdId(id,pageable);
 	}
 	
+	@RequestMapping(value="/item/{itemId}/comment/add",method=RequestMethod.POST, consumes= { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE } , produces=MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody Comment addComment(@PathVariable String itemId, @RequestBody Comment comment) {
+		log.info("WallController: addComment on item {} from author {}", itemId, comment.getAuthor());
+		
+		Item itemFound = this.itemService.findById(new Long(itemId));
+		if(itemFound == null) {
+			throw new ItemNotFoundException(new Long(itemId));
+		}
+		
+		comment.setItemId(itemFound);
+		
+		return commentService.addComment(comment);
+	}
 	
 	@RequestMapping(value="/search/title/{title}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Page<Item> retrieveItemsWithTitle(@PathVariable("title") String title, Pageable pageable) {

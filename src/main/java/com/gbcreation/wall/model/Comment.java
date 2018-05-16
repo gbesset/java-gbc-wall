@@ -16,7 +16,10 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -57,8 +60,10 @@ public class Comment {
 	private Date updatedAt;
 	
 
+	//@JsonBackReference is the back part of reference – it will be omitted from serialization.
+	//mais Pb deserialisation sur admin/add-> OK.  Aultre alternative :  avec @jsonIgnore ds comment...
 	@NotNull
-	@JsonBackReference
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "item_id")
 	private Item itemId;

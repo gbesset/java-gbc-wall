@@ -1,6 +1,6 @@
 package com.gbcreation.wall.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -237,16 +237,14 @@ public class CommentServiceTest {
 	public void test_update_comment() {
 		Comment c = new Comment("John Doe", "nice picture1", items.get(0));
 		Comment comUpdated = new Comment("John Doe", "nice picture1, one of your i guess", items.get(0));
-		Date modifiedDate = new Date();
-		comUpdated.setUpdatedAt(modifiedDate);
 		
 		when(commentRepository.save(c)).thenReturn(comUpdated);
 		
 		Comment result= commentService.updateComment(c);
 
 		assertEquals(result,comUpdated);
-		assertEquals(c.getUpdatedAt(),null);
-		assertEquals(result.getUpdatedAt(),modifiedDate);
+		assertNull(c.getUpdatedAt());
+		assertNotNull(result.getUpdatedAt());
     		verify(commentRepository).save(c);
     		verifyNoMoreInteractions(commentRepository);
 	}

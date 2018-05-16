@@ -1,7 +1,6 @@
 package com.gbcreation.wall.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -303,15 +302,13 @@ public class ItemServiceTest {
 	    public void test_update_item() {
 	    		Item item = new Item("test-picture-001", "/some/local/path/", "this is a beautiful picture",ItemType.PICTURE);
 	    		Item itemUpdated = new Item("test-picture-001", "/some/local/path/", "this is a beautiful picture that has been modified",ItemType.PICTURE);
-	    		Date modifiedDate = new Date();
-	    		itemUpdated.setUpdatedAt(modifiedDate);
 	    		
 	    		when(itemRepository.save(item)).thenReturn(itemUpdated);
 	    		Item result= itemService.updateItem(item);
 	
 	    		assertEquals(result,itemUpdated);
-	    		assertEquals(item.getUpdatedAt(),null);
-	    		assertEquals(result.getUpdatedAt(),modifiedDate);
+	    		assertNull(item.getUpdatedAt());
+	    		assertNotNull(result.getUpdatedAt());
 		    	verify(itemRepository).save(item);
 		    	verifyNoMoreInteractions(itemRepository);
 	    }

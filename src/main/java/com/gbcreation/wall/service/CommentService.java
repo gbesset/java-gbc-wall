@@ -21,7 +21,7 @@ public interface CommentService {
 	Page<Comment> findByAuthorLike(String author, Pageable pageable);
 	
 	//Pour l'administration
-	void addComment(Comment c);
+	Comment addComment(Comment c);
 	Comment updateComment(Comment c);
 	void deleteComment(Comment c);
 }

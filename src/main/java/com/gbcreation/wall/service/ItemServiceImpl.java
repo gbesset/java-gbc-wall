@@ -1,6 +1,7 @@
 package com.gbcreation.wall.service;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -80,13 +81,15 @@ public class ItemServiceImpl implements ItemService{
 	}
 
 	@Override
-	public void addItem(Item i) {
-		itemRepository.save(i);
+	public Item addItem(Item i) {
+		return itemRepository.save(i);
 	}
 
 	@Override
 	public Item updateItem(Item i) {
-		return itemRepository.save(i);
+		Item itUpdated = itemRepository.save(i);
+		itUpdated.setUpdatedAt(new Date());
+		return itUpdated;
 	}
 
 	@Override
