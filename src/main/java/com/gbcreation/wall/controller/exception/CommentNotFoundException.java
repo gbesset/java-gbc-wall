@@ -9,6 +9,6 @@ public class CommentNotFoundException extends RuntimeException {
 		super("could not find comment '" + commentId + "'.");
 	}
 	public CommentNotFoundException(String msg) {
-		super(msg + "'.");
+		super(msg + ".");
 	}
 }

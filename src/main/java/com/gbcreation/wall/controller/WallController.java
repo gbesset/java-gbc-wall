@@ -8,7 +8,9 @@ import javax.annotation.Resource;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -132,17 +134,17 @@ public class WallController {
 	}
 	
 	@RequestMapping(value="/item/{itemId}/comment/add",method=RequestMethod.POST, consumes= { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE } , produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody Comment addComment(@PathVariable String itemId, @RequestBody Comment comment) {
+	public ResponseEntity<Comment> addComment(@PathVariable String itemId, @RequestBody Comment comment) {
 		log.info("WallController: addComment on item {} from author {}", itemId, comment.getAuthor());
 		
 		Item itemFound = this.itemService.findById(new Long(itemId));
 		if(itemFound == null) {
-			throw new ItemNotFoundException(new Long(itemId));
+			return new ResponseEntity(new ItemNotFoundException(new Long(itemId)),HttpStatus.BAD_REQUEST);
 		}
 		
 		comment.setItemId(itemFound);
 		
-		return commentService.addComment(comment);
+		return new ResponseEntity<Comment>(commentService.addComment(comment),HttpStatus.OK);
 	}
 	
 	@RequestMapping(value="/search/title/{title}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)

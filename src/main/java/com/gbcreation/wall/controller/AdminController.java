@@ -39,68 +39,95 @@ public class AdminController {
 	private CommentService commentService;
 	
 	@PostMapping(value="/item/add", consumes= { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE } , produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody Item addItem(@RequestBody Item item) {
+	public ResponseEntity<Item> addItem(@RequestBody Item item) {
 		log.info("AdminController: addItem {}", item.getFile());
-		return itemService.addItem(item);
+		try {
+			return new ResponseEntity<Item>(itemService.addItem(item),HttpStatus.OK);
+		}
+		catch(Exception e) {
+			return new ResponseEntity(e, HttpStatus.BAD_REQUEST);
+		}
 	}
 	
 	@RequestMapping(value="/item/update",method=RequestMethod.PUT, consumes= { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE } , produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody Item updateItem(@RequestBody Item item) {
-		
-		if(item.getId() !=null ) {
-			log.info("AdminController: updateItem id {}", item.getId());
+	public ResponseEntity<Item> updateItem(@RequestBody Item item) {
+		try {
+			if(item.getId() !=null ) {
+				log.info("AdminController: updateItem id {}", item.getId());
 			
-			validateItem(item.getId());		
-			return itemService.updateItem(item);
+				validateItem(item.getId());		
+				return new ResponseEntity<Item>(itemService.updateItem(item), HttpStatus.OK);
+			}
+			else {
+				throw new ItemNotFoundException("id not described in item");
+			}
 		}
-		else {
-			throw new ItemNotFoundException("id not described in item");
+		catch(ItemNotFoundException e) {
+			return new ResponseEntity(e, HttpStatus.BAD_REQUEST);
 		}
-		
 	}
 	
 	@RequestMapping(value="/item/delete/{id}",method=RequestMethod.DELETE)
-	public @ResponseBody String deleteItem(@PathVariable String id) {
+	public ResponseEntity<String> deleteItem(@PathVariable String id) {
 		log.info("AdminController: delete item {}",id);
-		Item itemFound = validateItem(new Long(id));	
-		itemService.deleteItem(itemFound);
-		return "item deleted";
+		try{
+			Item itemFound = validateItem(new Long(id));	
+
+			itemService.deleteItem(itemFound);
+			return new ResponseEntity("item deleted", HttpStatus.OK);
+		}
+		catch(ItemNotFoundException e) {
+			return new ResponseEntity(e, HttpStatus.BAD_REQUEST);
+		}
 	}
 	
 	
 	@RequestMapping(value="/item/{itemId}/comment/add",method=RequestMethod.POST, consumes= { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE } , produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody Comment addComment(@PathVariable String itemId, @RequestBody Comment comment) {
+	public ResponseEntity<Comment> addComment(@PathVariable String itemId, @RequestBody Comment comment) {
 		log.info("AdminController: addComment on item {} from author {}", itemId, comment.getAuthor());
-		
-		Item itemFound = validateItem(new Long(itemId));
-		comment.setItemId(itemFound);
-		
-		return commentService.addComment(comment);
+		try {
+			Item itemFound = validateItem(new Long(itemId));
+			comment.setItemId(itemFound);
+			
+			return new ResponseEntity(commentService.addComment(comment), HttpStatus.OK);
+		}
+		catch(Exception e) {
+			return new ResponseEntity(e, HttpStatus.BAD_REQUEST);
+		}
 	}
 	
 	@RequestMapping(value="/comment/update",method=RequestMethod.PUT, consumes= { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE } , produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody Comment updateComment(@RequestBody Comment comment) {
-		if(comment.getId() !=null ) {
-			log.info("AdminController: updateComment id {}", comment.getId());
-			
-			validateComment(comment.getId());
-			Item itemFound = commentService.findById(comment.getId()).getItemId();
-			comment.setItemId(itemFound);
-			
-			return commentService.updateComment(comment);
+	public ResponseEntity<Comment> updateComment(@RequestBody Comment comment) {
+		try{
+			if(comment.getId() !=null ) {
+				log.info("AdminController: updateComment id {}", comment.getId());
+				
+				validateComment(comment.getId());
+				Item itemFound = commentService.findById(comment.getId()).getItemId();
+				comment.setItemId(itemFound);
+				
+				return new ResponseEntity(commentService.updateComment(comment), HttpStatus.OK);
+			}
+			else {
+				throw new CommentNotFoundException("id not described in comment");
+			}
 		}
-		else {
-			throw new CommentNotFoundException("id not described in comment");
+		catch(CommentNotFoundException e) {
+			return new ResponseEntity(e, HttpStatus.BAD_REQUEST);
 		}
 	}
 	
 	@RequestMapping(value="/comment/delete/{id}",method=RequestMethod.DELETE)
-	public @ResponseBody String deleteComment(@PathVariable String id) {
+	public ResponseEntity<String> deleteComment(@PathVariable String id) {
 		log.info("AdminController: delete comment {}",id);
-		
-		Comment commentFound = validateComment(new Long(id));
-		commentService.deleteComment(commentFound);
-		return "comment deleted";
+		try {
+			Comment commentFound = validateComment(new Long(id));
+			commentService.deleteComment(commentFound);
+			return new ResponseEntity("comment deleted", HttpStatus.OK);
+		}
+		catch(CommentNotFoundException e) {
+			return new ResponseEntity(e, HttpStatus.BAD_REQUEST);
+		}
 	}
 		
 	
@@ -126,7 +153,7 @@ public class AdminController {
 	private Comment validateComment(long commentId) {
 		Comment commentFound = this.commentService.findById(new Long(commentId));
 		if(commentFound == null) {
-			new CommentNotFoundException(commentId);
+			throw new CommentNotFoundException(commentId);
 		}
 		return commentFound;
 	}

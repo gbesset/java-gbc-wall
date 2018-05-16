@@ -1,12 +1,12 @@
 package com.gbcreation.wall.controller;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -19,7 +19,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -30,6 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gbcreation.wall.model.Comment;
 import com.gbcreation.wall.model.Item;
 import com.gbcreation.wall.model.ItemType;
@@ -91,6 +91,64 @@ public class WallControllerUnitTest {
 		verifyNoMoreInteractions(itemServiceMock);
 	}
 	
+	@Test
+	public void test_create_comment() throws Exception {
+
+	    Item i= new Item("picture1.jpg","/some/local/folder/","First Picture",ItemType.PICTURE);
+	    i.setId(2l);
+		Comment c = new Comment("author 1","this is my comment", i);
+		c.setId(21l);
+		
+		when(itemServiceMock.findById(2l)).thenReturn(i);
+		when(commentServiceMock.addComment(any(Comment.class))).thenReturn(c);
+		
+	    mockMvc.perform(
+	            post(PATH+"/item/2/comment/add")
+	                    .contentType(MediaType.APPLICATION_JSON)
+	                    .content(asJsonString(c)))
+	    			.andExpect(jsonPath("$.id").value(21l))
+	    			.andExpect(jsonPath("$.author").value("author 1"))
+	    			.andExpect(status().is(200));
+	    
+	    verify(itemServiceMock, times(1)).findById(2l);
+	    verify(commentServiceMock, times(1)).addComment(any(Comment.class));
+	    verifyNoMoreInteractions(itemServiceMock);
+	    verifyNoMoreInteractions(commentServiceMock);
+	}
+	
+	@Test
+	public void test_create_comment_no_item_id() throws Exception {
+
+	    Item i= new Item("picture1.jpg","/some/local/folder/","First Picture",ItemType.PICTURE);
+	    i.setId(2l);
+		Comment c = new Comment("author 1","this is my comment", i);
+    
+		when(itemServiceMock.findById(2l)).thenReturn(null);
+		
+	    mockMvc.perform(
+	            post(PATH+"/item/2/comment/add")
+	                    .contentType(MediaType.APPLICATION_JSON)
+	                    .content(asJsonString(c)))
+			.andDo(print())
+	        .andExpect(status().is(400))
+	        	.andExpect(jsonPath("$.message").value("could not find item '2'."));
+	    
+	    verify(itemServiceMock, times(1)).findById(2l);
+	    verifyNoMoreInteractions(itemServiceMock);
+	    verifyNoMoreInteractions(commentServiceMock);
+	}
+	
+	 /*
+     * converts a Java object into JSON representation
+     */
+    public static String asJsonString(final Object obj) {
+        try {
+            return new ObjectMapper().writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
 	//Problème  cause Pageable
 	// Failed to instantiate Pageable, Specified class is an interface
 	
