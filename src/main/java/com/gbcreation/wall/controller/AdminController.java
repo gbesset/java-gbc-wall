@@ -74,7 +74,7 @@ public class AdminController {
 			Item itemFound = validateItem(new Long(id));	
 
 			itemService.deleteItem(itemFound);
-			return new ResponseEntity("item deleted", HttpStatus.OK);
+			return new ResponseEntity(HttpStatus.OK);
 		}
 		catch(ItemNotFoundException e) {
 			return new ResponseEntity(e, HttpStatus.BAD_REQUEST);
@@ -123,7 +123,7 @@ public class AdminController {
 		try {
 			Comment commentFound = validateComment(new Long(id));
 			commentService.deleteComment(commentFound);
-			return new ResponseEntity("comment deleted", HttpStatus.OK);
+			return new ResponseEntity(HttpStatus.OK);
 		}
 		catch(CommentNotFoundException e) {
 			return new ResponseEntity(e, HttpStatus.BAD_REQUEST);

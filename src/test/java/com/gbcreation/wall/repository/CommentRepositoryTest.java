@@ -205,7 +205,8 @@ public class CommentRepositoryTest {
 		 assertEquals(" done comm11.2 love it!", resultsPaged.getContent().get(2).getComment());
 		 assertEquals(" ok comm10.2 love it!", resultsPaged.getContent().get(3).getComment());
 		 assertEquals(" POOL - comm7.2 love it!", resultsPaged.getContent().get(4).getComment());
-	  }
+		 
+	 }
 	 
 	 @Test
 	  public void test_filtering_on_author_field_and_fieldIgnoreCase() {
@@ -235,6 +236,28 @@ public class CommentRepositoryTest {
 		 assertEquals(" mountain - comm2 love it!", resultsPaged.getContent().get(3).getComment());
 	  }
 
+	 @Test
+	  public void test_search_on_comment_field_and_fieldIgnoreCase() {
+		 for(Comment com : createSomeComments()) {
+			 commentRepository.save(com);
+		 }
+		 
+		 assertEquals(15,commentRepository.count());
+		 List<Comment> results = commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("bOAt");
+		 assertEquals(1, results.size());
+		 assertEquals(" sand and boat  comm5 love it!", results.get(0).getComment());
+		 
+		 results = commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("bOAdezdzdzdqt");
+		 assertEquals(0, results.size());
+		 
+		 results = commentRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("AU2thOr");
+		 assertEquals(1, results.size());
+		 assertEquals("Au2thor", results.get(0).getAuthor());
+		 
+		 results = commentRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("AU2thdzedzOr");
+		 assertEquals(0, results.size());
+		 
+	  }
 
 	private  List<Comment> createSomeComments() {
 		 Instant today = Instant.parse("2018-04-10T15:11:00.225Z");

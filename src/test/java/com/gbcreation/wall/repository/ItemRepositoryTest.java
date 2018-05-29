@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -107,6 +108,32 @@ public class ItemRepositoryTest {
 	    
 	    itemRepository.deleteAll();
 	  }
+	 
+	 @Test
+	  public void test_findBy_Ids_OK() {
+		 for(Item it : createSomeItems()) {
+			 itemRepository.save(it);
+		 }
+
+		 List<Item> all = Lists.newArrayList(itemRepository.findAll());
+		 Page<Item> resultsPaged = itemRepository.findByIdIn(Arrays.asList(all.get(0).getId(), all.get(2).getId(), all.get(5).getId()), new PageRequest(0, 20));
+		 
+		 assertEquals(3, resultsPaged.getContent().size());
+		 assertEquals("picture1.jpg", resultsPaged.getContent().get(0).getFile());
+		 assertEquals("codevideo1", resultsPaged.getContent().get(1).getFile());
+		 assertEquals("codevideo3", resultsPaged.getContent().get(2).getFile());
+		}
+	 
+	 @Test
+	  public void test_findBy_Ids_noResults() {
+		 for(Item it : createSomeItems()) {
+			 itemRepository.save(it);
+		 }
+
+		 Page<Item> resultsPaged = itemRepository.findByIdIn(Arrays.asList(95485654l, 459125l), new PageRequest(0, 20));
+		 
+		 assertEquals(0, resultsPaged.getContent().size());
+		}
 	 
 	 @Test
 	  public void test_findBy_some_attribute() {

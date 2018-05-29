@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -224,6 +225,77 @@ public class CommentServiceTest {
 		verifyNoMoreInteractions(commentRepository);
 	}
 	
+	
+	@Test
+	public void test_find_ItemIdsBy_Comment_like() {
+		when(commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("search content")).thenReturn(comments);
+		
+		List<Long> resultService = commentService.findItemIdsByCommentLike("search content");
+
+		List<Long> results = Arrays.asList(301l,305l,307l);
+		assertEquals(resultService.size(),results.size());
+		assertEquals(resultService,results);
+
+		verify(commentRepository).findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("search content");
+		verifyNoMoreInteractions(commentRepository);
+	}
+
+	@Test
+	public void test_find_ItemIdsBy_Comment_like_OneResult() {
+		when(commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("agreed")).thenReturn(comments.stream().filter(c -> c.getComment().equals("not agreed")).collect(Collectors.toList()));
+		
+		List<Long> resultService = commentService.findItemIdsByCommentLike("agreed");
+
+		List<Long> results = Arrays.asList(305l);
+		assertEquals(resultService.size(),results.size());
+		assertEquals(resultService,results);
+
+		verify(commentRepository).findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("agreed");
+		verifyNoMoreInteractions(commentRepository);
+	}
+	
+	@Test
+	public void test_find_ItemIdsBy_Comment_like_noResults() {
+		when(commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("search content")).thenReturn(new ArrayList());
+		
+		List<Long> resultService = commentService.findItemIdsByCommentLike("search content");
+
+		List<Long> results = new ArrayList<>();
+		assertEquals(resultService.size(),results.size());
+		assertEquals(resultService,results);
+
+		verify(commentRepository).findByCommentContainingIgnoreCaseOrderByCreatedAtDesc("search content");
+		verifyNoMoreInteractions(commentRepository);
+	}
+	@Test
+	public void test_find_ItemIdsBy_Author_like() {
+		when(commentRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("John Doe")).thenReturn(comments.stream().filter(c -> c.getAuthor().equals("John Doe")).collect(Collectors.toList()));
+		
+		List<Long> resultService = commentService.findItemIdsByAuthorLike("John Doe");
+
+		List<Long> results = Arrays.asList(301l,307l);
+		assertEquals(resultService.size(),results.size());
+		assertEquals(resultService,results);
+
+		verify(commentRepository).findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("John Doe");
+		verifyNoMoreInteractions(commentRepository);
+	}
+
+	@Test
+	public void test_find_ItemIdsBy_Author_like_noResults() {
+		when(commentRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("John Doe")).thenReturn(new ArrayList());
+		
+		List<Long> resultService = commentService.findItemIdsByAuthorLike("John Doe");
+
+		List<Long> results = new ArrayList<>();
+		assertEquals(resultService.size(),results.size());
+		assertEquals(resultService,results);
+
+		verify(commentRepository).findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("John Doe");
+		verifyNoMoreInteractions(commentRepository);
+	}
+	
+	
 	@Test
 	public void test_add_comment() {
 		Comment c = new Comment("John Doe", "nice picture1", items.get(0));
@@ -272,6 +344,13 @@ public class CommentServiceTest {
 	    	items.add(new Item("codevideo4","http://youtube.com/some/path/", "Demo video 4",ItemType.VIDEO_YOUTUBE));
 	    	items.add(new Item("picture7.jpg","/some/local/folder/", "Seventh Picture",ItemType.PICTURE));
 	    	items.add(new Item("codevideo5","http://youtube.com/some/path/", "Demo video 5",ItemType.VIDEO_YOUTUBE));
+	    	
+	    	Long l =301l;
+			for (Item i : items) {
+				i.setId(l);
+				l++;
+			}
+			
 	    	return items;
     }
     
@@ -292,6 +371,11 @@ public class CommentServiceTest {
 		comments.add(new Comment("Eleanor Fant Mann", "no idea, so beautiful. wow", items.get(6)));
 		comments.add(new Comment("Guy Mann", "ah ok, it's south africa", items.get(6)));
 		
+		Long l =101l;
+		for (Comment c : comments) {
+			c.setId(l);
+			l++;
+		}
 		return comments;
 	}
 }

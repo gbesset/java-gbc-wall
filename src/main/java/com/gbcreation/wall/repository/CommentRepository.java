@@ -23,4 +23,8 @@ public interface CommentRepository extends CrudRepository<Comment, Long>{
 	Page<Comment> findByItemIdIdOrderByCreatedAtDesc(Long itemIdId, Pageable pageable);
 	Page<Comment> findByCommentContainingIgnoreCaseOrderByCreatedAtDesc(String comment, Pageable pageable);
 	Page<Comment> findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc(String author, Pageable pageable);
+	
+	List<Comment> findByCommentContainingIgnoreCaseOrderByCreatedAtDesc(String comment);
+	List<Comment> findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc(String author);
+	
 }

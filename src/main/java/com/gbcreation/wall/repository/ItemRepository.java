@@ -1,5 +1,6 @@
 package com.gbcreation.wall.repository;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -13,6 +14,8 @@ import com.gbcreation.wall.model.ItemType;
 
 //This will be AUTO IMPLEMENTED by Spring into a Bean called itemRepository
 public interface ItemRepository extends PagingAndSortingRepository<Item,Long>, JpaSpecificationExecutor{
+	
+	Page<Item> findByIdIn(List<Long> ids, Pageable pageable);
 	
 	//Attention au by  findAll BY  order....
 	Page<Item> findAllByOrderByCreatedAtDesc(Pageable pageable);

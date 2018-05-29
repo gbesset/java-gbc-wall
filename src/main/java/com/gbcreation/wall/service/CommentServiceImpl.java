@@ -2,6 +2,7 @@ package com.gbcreation.wall.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -71,14 +72,25 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	public Comment updateComment(Comment c) {
-		Comment cUpdated= commentRepository.save(c);
-		cUpdated.setUpdatedAt(new Date());
-		return cUpdated;
+		c.setUpdatedAt(new Date());
+		return commentRepository.save(c);
 	}
 
 	@Override
 	public void deleteComment(Comment c) {
 		commentRepository.delete(c);
+	}
+
+	@Override
+	public List<Long> findItemIdsByCommentLike(String comment) {
+		List<Comment> comments = commentRepository.findByCommentContainingIgnoreCaseOrderByCreatedAtDesc(comment);
+		return comments.stream().map(c -> new Long(c.getItemId().getId())).distinct().collect(Collectors.toList());
+	}
+
+	@Override
+	public List<Long> findItemIdsByAuthorLike(String author) {
+		List<Comment> comments = commentRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc(author);
+		return comments.stream().map(c -> new Long(c.getItemId().getId())).distinct().collect(Collectors.toList());
 	}
 
 }

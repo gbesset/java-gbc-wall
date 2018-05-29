@@ -91,6 +91,11 @@ public class WallControllerUnitTest {
 		verifyNoMoreInteractions(itemServiceMock);
 	}
 	
+/*
+ * TU search item from comment cf integration test
+ * 
+ */
+	
 	@Test
 	public void test_create_comment() throws Exception {
 

@@ -46,6 +46,11 @@ public class ItemServiceImpl implements ItemService{
 	public Item findById(Long id) {
 		return itemRepository.findOne(id);
 	}
+	
+	@Override
+	public Page<Item> findByIds(List<Long> ids, Pageable pageable) {
+		return itemRepository.findByIdIn(ids, pageable);
+	}
 
 	@Override
 	public List<Item> findByFile(String file) {
@@ -87,9 +92,8 @@ public class ItemServiceImpl implements ItemService{
 
 	@Override
 	public Item updateItem(Item i) {
-		Item itUpdated = itemRepository.save(i);
-		itUpdated.setUpdatedAt(new Date());
-		return itUpdated;
+		i.setUpdatedAt(new Date());
+		return itemRepository.save(i);
 	}
 
 	@Override

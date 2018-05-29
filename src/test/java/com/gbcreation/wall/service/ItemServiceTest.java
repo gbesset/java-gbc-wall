@@ -157,6 +157,38 @@ public class ItemServiceTest {
 	    }
 	    
 	    @Test
+	    public void test_findBy_ids_OK() {
+
+	    		List<Item> resExpected = items.stream().filter(i -> i.getId()==301 || i.getId()==303 || i.getId() == 309).collect(Collectors.toList());
+	    		when(page.getContent()).thenReturn(resExpected);
+	    		when(itemRepository.findByIdIn(Arrays.asList(301l, 303l, 309l), pageable)).thenReturn(page);
+	    		
+		    	Page<Item> results = itemService.findByIds(Arrays.asList(301l, 303l, 309l), pageable);
+	
+		    	assertEquals(resExpected.size(), results.getContent().size());
+		    	assertEquals("picture1.jpg", results.getContent().get(0).getFile());
+		    	assertEquals("codevideo1", results.getContent().get(1).getFile());
+		    	assertEquals("picture6.jpg", results.getContent().get(2).getFile());
+	
+		    	verify(itemRepository).findByIdIn(Arrays.asList(301l, 303l, 309l), pageable);
+		    	verifyNoMoreInteractions(itemRepository);
+	    }
+	    
+	    @Test
+	    public void test_findBy_ids_noResults() {
+
+	    		when(page.getContent()).thenReturn(new ArrayList());
+	    		when(itemRepository.findByIdIn(Arrays.asList(501l, 503l, 509l), pageable)).thenReturn(page);
+	    		
+		    	Page<Item> results = itemService.findByIds(Arrays.asList(501l, 503l, 509l), pageable);
+	
+		    	assertEquals(new ArrayList().size(), results.getContent().size());
+	
+		    	verify(itemRepository).findByIdIn(Arrays.asList(501l, 503l, 509l), pageable);
+		    	verifyNoMoreInteractions(itemRepository);
+	    }
+	    
+	    @Test
 	    public void test_findBy_title() {
 	    		Item item = new Item("test-picture-001", "/some/local/path/", "this is a beautiful picture",ItemType.PICTURE);
 
@@ -336,6 +368,13 @@ public class ItemServiceTest {
 		    	items.add(new Item("codevideo4","http://youtube.com/some/path/", "Demo video 4",ItemType.VIDEO_YOUTUBE));
 		    	items.add(new Item("picture7.jpg","/some/local/folder/", "Seventh Picture",ItemType.PICTURE));
 		    	items.add(new Item("codevideo5","http://youtube.com/some/path/", "Demo video 5",ItemType.VIDEO_YOUTUBE));
+		    	
+	     	Long l =301l;
+			for (Item i : items) {
+				i.setId(l);
+				l++;
+			}
+				
 		    	return items;
 	    }
 	    

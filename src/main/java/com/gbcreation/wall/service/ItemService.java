@@ -14,6 +14,7 @@ public interface ItemService {
 	Long countVideos();
 	
 	Item findById(Long id);
+	Page<Item> findByIds(List<Long> ids, Pageable pageable);
 	List<Item> findByFile(String title);
 	Page<Item> findByFileLike(String title, Pageable pageable);
 	Page<Item> findByDescriptionLike(String description, Pageable pageable);

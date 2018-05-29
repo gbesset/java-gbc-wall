@@ -20,6 +20,9 @@ public interface CommentService {
 	Page<Comment> findByCommentLike(String comment, Pageable pageable);
 	Page<Comment> findByAuthorLike(String author, Pageable pageable);
 	
+	List<Long> findItemIdsByCommentLike(String comment);
+	List<Long> findItemIdsByAuthorLike(String author);
+	
 	//Pour l'administration
 	Comment addComment(Comment c);
 	Comment updateComment(Comment c);

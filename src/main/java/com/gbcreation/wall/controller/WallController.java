@@ -1,7 +1,9 @@
 package com.gbcreation.wall.controller;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -147,32 +149,58 @@ public class WallController {
 		return new ResponseEntity<Comment>(commentService.addComment(comment),HttpStatus.OK);
 	}
 	
-	@RequestMapping(value="/search/title/{title}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value="/search/item/title/{title}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Page<Item> retrieveItemsWithTitle(@PathVariable("title") String title, Pageable pageable) {
 		log.info("WallController: retrieveItemsWithTitle");
 		
 		return itemService.findByFileLike(title, pageable);
 	}
 	
-	@RequestMapping(value="/search/description/{description}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value="/search/item/description/{description}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Page<Item> retrieveItemsWithDescription(@PathVariable("description") String description, Pageable pageable) {
 		log.info("WallController: retrieveItemsWithDescription");
 		
 		return itemService.findByDescriptionLike(description, pageable);
 	}
 	
-	@RequestMapping(value="/search/comment/{comment}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value="/search/item/comment/{comment}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody Page<Item> retrieveItemsWithComment(@PathVariable("comment") String comment, Pageable pageable) {
+		log.info("WallController: retrieveItemssWithComment");
+		
+		List<Long> itemsFound = commentService.findItemIdsByCommentLike(comment);
+		
+		return itemService.findByIds(itemsFound, pageable);
+	}
+	
+	@RequestMapping(value="/search/item/author/{author}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody Page<Item> retrieveItemsWithAuthor(@PathVariable("author") String author, Pageable pageable) {
+		log.info("WallController: retrieveItemsWithAuthor");
+		
+		List<Long> itemsFound = commentService.findItemIdsByAuthorLike(author);
+		return itemService.findByIds(itemsFound, pageable);
+	}
+	
+	@RequestMapping(value="/search/comment/comment/{comment}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Page<Comment> retrieveCommentsWithComment(@PathVariable("comment") String comment, Pageable pageable) {
 		log.info("WallController: retrieveCommentsWithComment");
 		
 		return commentService.findByCommentLike(comment, pageable);
 	}
 	
-	@RequestMapping(value="/search/author/{author}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value="/search/comment/author/{author}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Page<Comment> retrieveCommentsWithAuthor(@PathVariable("author") String author, Pageable pageable) {
 		log.info("WallController: retrieveCommentsWithAuthor");
 		
 		return commentService.findByAuthorLike(author, pageable);
 	}
+	
+	/*@RequestMapping(value="/search/item/comment/{id}",method=RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Item> retrieveItemFromComment(@PathVariable("id") String commentId) {
+		log.info("WallController: retrieveItemFromComment id ", commentId);
+		
+		Item itFound= commentService.findById(new Long(commentId)).getItemId();
+		Item it = itemService.findById(itFound.getId());
+		return new ResponseEntity(it, HttpStatus.OK);
+	}*/
 	
 }
