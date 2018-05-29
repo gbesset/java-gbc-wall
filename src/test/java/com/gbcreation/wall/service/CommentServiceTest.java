@@ -309,13 +309,14 @@ public class CommentServiceTest {
 	public void test_update_comment() {
 		Comment c = new Comment("John Doe", "nice picture1", items.get(0));
 		Comment comUpdated = new Comment("John Doe", "nice picture1, one of your i guess", items.get(0));
+		comUpdated.setUpdatedAt(new Date());
 		
 		when(commentRepository.save(c)).thenReturn(comUpdated);
+		assertNull(c.getUpdatedAt());
 		
 		Comment result= commentService.updateComment(c);
 
 		assertEquals(result,comUpdated);
-		assertNull(c.getUpdatedAt());
 		assertNotNull(result.getUpdatedAt());
     		verify(commentRepository).save(c);
     		verifyNoMoreInteractions(commentRepository);

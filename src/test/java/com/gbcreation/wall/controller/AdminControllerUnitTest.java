@@ -168,7 +168,6 @@ public class AdminControllerUnitTest {
 		
 		mockMvc.perform(delete(PATH + "/item/delete/{id}", it.getId())
 				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$").value("item deleted"))
 			.andExpect(status().is(200));
 		
 		 verify(itemServiceMock, times(1)).findById(145l);
@@ -334,7 +333,6 @@ public class AdminControllerUnitTest {
 		
 		mockMvc.perform(delete(PATH + "/comment/delete/{id}", c.getId())
 				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$").value("comment deleted"))
 			.andExpect(status().is(200));
 		
 		 verify(commentServiceMock, times(1)).findById(21l);

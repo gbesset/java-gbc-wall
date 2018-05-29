@@ -26,7 +26,7 @@ formater le texte et mettre en place script comme chez n pour auto indent et coh
 * TestNG					[]
 
 ## Monitoring et info diverses
-* Actuator				[]
+* Actuator				[X]
 
 
 ## TODO

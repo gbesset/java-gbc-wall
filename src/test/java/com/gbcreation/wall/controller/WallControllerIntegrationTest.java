@@ -56,28 +56,6 @@ public class WallControllerIntegrationTest {
 	 
 	private static String PATH = "/api/wall";
 	
-
-    private HttpMessageConverter mappingJackson2HttpMessageConverter;
-	 
-    @Autowired
-    void setConverters(HttpMessageConverter<?>[] converters) {
-
-        this.mappingJackson2HttpMessageConverter = Arrays.asList(converters).stream()
-            .filter(hmc -> hmc instanceof MappingJackson2HttpMessageConverter)
-            .findAny()
-            .orElse(null);
-
-        assertNotNull("the JSON message converter must not be null",
-                this.mappingJackson2HttpMessageConverter);
-    }
-   
-    protected String json(Object o) throws IOException {
-        MockHttpOutputMessage mockHttpOutputMessage = new MockHttpOutputMessage();
-        this.mappingJackson2HttpMessageConverter.write(
-                o, MediaType.APPLICATION_JSON, mockHttpOutputMessage);
-        return mockHttpOutputMessage.getBodyAsString();
-    }
-    
 	@Test
 	public void contex_loads() throws Exception {
 		assertThat(controller).isNotNull();
@@ -146,9 +124,9 @@ public class WallControllerIntegrationTest {
 	        		;
 	    }
 	 @Test
-	    public void test_search_title() throws Exception {
+	    public void test_search_item_title() throws Exception {
 	    		
-	        mockMvc.perform(get(PATH+"/search/title/ipod"))
+	        mockMvc.perform(get(PATH+"/search/item/title/ipod"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -158,7 +136,7 @@ public class WallControllerIntegrationTest {
 	        		.andExpect(jsonPath("$.content[0].file").value("Futurama-iPod-1024x768-05f116.jpg"))
 	        		;
 	        
-	        mockMvc.perform(get(PATH+"/search/title/IPOD"))
+	        mockMvc.perform(get(PATH+"/search/item/title/IPOD"))
 		    		.andDo(print())
 		    		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 		    		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -169,7 +147,7 @@ public class WallControllerIntegrationTest {
 		    		.andExpect(jsonPath("$.content[0].file").value("Futurama-iPod-1024x768-05f116.jpg"))
 		    		;
 	        
-        		mockMvc.perform(get(PATH+"/search/title/simpsons"))
+        		mockMvc.perform(get(PATH+"/search/item/title/simpsons"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -181,7 +159,7 @@ public class WallControllerIntegrationTest {
 	        		.andExpect(jsonPath("$.content[1].file").value("the-simpsons-futurama-crossover-9de538.jpg"))
 	        		;
 	        		
-        		mockMvc.perform(get(PATH+"/search/title/bender"))
+        		mockMvc.perform(get(PATH+"/search/item/title/bender"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -197,9 +175,9 @@ public class WallControllerIntegrationTest {
 	        		;
 	    }
 	 @Test
-	    public void test_search_title_noResults() throws Exception {
+	    public void test_search_item_title_noResults() throws Exception {
 	    		
-	        mockMvc.perform(get(PATH+"/search/title/hdsf12ff"))
+	        mockMvc.perform(get(PATH+"/search/item/title/hdsf12ff"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -209,9 +187,9 @@ public class WallControllerIntegrationTest {
 	        		;
 	 }
 	 @Test
-	    public void test_search_description() throws Exception {
+	    public void test_search_item_description() throws Exception {
  		
-	        mockMvc.perform(get(PATH+"/search/description/bender"))
+	        mockMvc.perform(get(PATH+"/search/item/description/bender"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -224,22 +202,9 @@ public class WallControllerIntegrationTest {
 	        		.andExpect(jsonPath("$.content[2].description").value("Bender switch off"))
 	        		.andExpect(jsonPath("$.content[3].description").value("bender cartoon"))
 	        		;
+	       
 	        
-	        mockMvc.perform(get(PATH+"/search/description/bender"))
-		        .andDo(print())
-		        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
-		        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-		        .andExpect(status().isOk())
-        			.andExpect(jsonPath("$.totalElements").value(4))
-		        .andExpect(jsonPath("$.content[*]").isArray())
-		        .andExpect(jsonPath("$.content[*]", hasSize(4)))
-		        .andExpect(jsonPath("$.content[0].description").value("bender"))
-		        .andExpect(jsonPath("$.content[1].description").value("Air bender"))
-		        .andExpect(jsonPath("$.content[2].description").value("Bender switch off"))
-		        .andExpect(jsonPath("$.content[3].description").value("bender cartoon"))
-		        ;
-	        
-	        mockMvc.perform(get(PATH+"/search/description/ipod"))
+	        mockMvc.perform(get(PATH+"/search/item/description/ipOD"))
 		        .andDo(print())
 		        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 		        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -250,7 +215,7 @@ public class WallControllerIntegrationTest {
 		        .andExpect(jsonPath("$.content[0].description").value("Ipod, style"))
 	        ;
 	        
-	        mockMvc.perform(get(PATH+"/search/description/affiche"))
+	        mockMvc.perform(get(PATH+"/search/item/description/aFFicHe"))
 		        .andDo(print())
 		        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 		        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -264,9 +229,9 @@ public class WallControllerIntegrationTest {
 	    }
 
 	 	@Test
-	    public void test_search_description_noResults() throws Exception {
+	    public void test_search_item_description_noResults() throws Exception {
 	    		
-	        mockMvc.perform(get(PATH+"/search/description/a@&fg!fterh"))
+	        mockMvc.perform(get(PATH+"/search/item/description/afterhoa"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -276,11 +241,67 @@ public class WallControllerIntegrationTest {
 	        		;
 	    }
 	 	
+	 	 @Test
+	    public void test_search_item_comments() throws Exception {
+ 		
+	        mockMvc.perform(get(PATH+"/search/item/comment/prEFeR?page=0"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+        			.andExpect(jsonPath("$.totalElements").value(1))
+    		        .andExpect(jsonPath("$.content[*]").isArray())
+    		        .andExpect(jsonPath("$.content[*]", hasSize(1)))
+    		        .andExpect(jsonPath("$.content[0].file").value("bender-futurama-robot-p-753df5.jpg"))
+    		        ;
+	        			    }
+	 	 
+	 	@Test
+	    public void test_search_item_comments_noResults() throws Exception {
+ 		
+	        mockMvc.perform(get(PATH+"/search/item/comment/dafgsfdfrg"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+	        		.andExpect(jsonPath("$.totalElements").value(0))
+	        		.andExpect(jsonPath("$.content[*]", hasSize(0)))
+	        		;
+	 	}
+	 	
+	 	 @Test
+		    public void test_search_item_author() throws Exception {
+	 		
+		        mockMvc.perform(get(PATH+"/search/item/author/faTHer?page=0"))
+		        		.andDo(print())
+		        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+		        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+		        		.andExpect(status().isOk())
+	        			.andExpect(jsonPath("$.totalElements").value(2))
+	    		        .andExpect(jsonPath("$.content[*]").isArray())
+	    		        .andExpect(jsonPath("$.content[*]", hasSize(2)))
+	    		        .andExpect(jsonPath("$.content[0].file").value("big3-1cd860.gif"))
+	    		        .andExpect(jsonPath("$.content[1].file").value("bender-futurama-robot-p-753df5.jpg"))
+	    		        ;
+		    }
+		 	 
+		 	@Test
+		    public void test_search_item_author_noResults() throws Exception {
+	 		
+		        mockMvc.perform(get(PATH+"/search/item/comment/dafgsfdfrg"))
+		        		.andDo(print())
+		        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+		        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+		        		.andExpect(status().isOk())
+		        		.andExpect(jsonPath("$.totalElements").value(0))
+		        		.andExpect(jsonPath("$.content[*]", hasSize(0)))
+		        		;
+		 	}
 	 	
 	 	@Test
-	    public void test_search_comments() throws Exception {
+	    public void test_search_comment_comments() throws Exception {
     		
-	        mockMvc.perform(get(PATH+"/search/comment/picture"))
+	        mockMvc.perform(get(PATH+"/search/comment/comment/picture"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -292,7 +313,7 @@ public class WallControllerIntegrationTest {
 	        		.andExpect(jsonPath("$.content[2].comment").value("Great picture"))
 	        		;
 	        
-	        mockMvc.perform(get(PATH+"/search/comment/this picture"))
+	        mockMvc.perform(get(PATH+"/search/comment/comment/this picture"))
 		    		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 		    		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 		    		.andExpect(status().isOk())
@@ -305,9 +326,9 @@ public class WallControllerIntegrationTest {
 	    }
 	    
 	    @Test
-	    public void test_search_comments_noResults() throws Exception {
+	    public void test_search_comment_comments_noResults() throws Exception {
 	    		
-	        mockMvc.perform(get(PATH+"/search/comment/another one"))
+	        mockMvc.perform(get(PATH+"/search/comment/comment/another one"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -319,9 +340,9 @@ public class WallControllerIntegrationTest {
 	    }
 	    
 	    @Test
-	    public void test_search_authors() throws Exception {
+	    public void test_search_comment_authors() throws Exception {
     		
-	        mockMvc.perform(get(PATH+"/search/author/ther"))
+	        mockMvc.perform(get(PATH+"/search/comment/author/ther"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -338,9 +359,9 @@ public class WallControllerIntegrationTest {
 	    }
 	    
 	    @Test
-	    public void test_search_author_noResults() throws Exception {
+	    public void test_search_comment_author_noResults() throws Exception {
 	    		
-	        mockMvc.perform(get(PATH+"/search/author/another one"))
+	        mockMvc.perform(get(PATH+"/search/comment/author/another one"))
 	        		.andDo(print())
 	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
 	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -348,7 +369,29 @@ public class WallControllerIntegrationTest {
 	        		.andExpect(jsonPath("$.totalElements").value(0))
 	        		.andExpect(jsonPath("$.content[*]", hasSize(0)))
 	        		;
-	        
 	    }
 	    	    
+	   /* @Test
+	    public void test_search_item_from_comment() throws Exception {
+	    		
+	        mockMvc.perform(get(PATH+"/search/item/comment/2"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().isOk())
+	        		.andExpect(jsonPath("$.id").value(230))
+	        		.andExpect(jsonPath("$.file").value("bender-futurama-robot-p-753df5.jpg"))
+	        		;
+	    }
+	    
+	    @Test
+	    public void test_search_item_from_comment_noResults() throws Exception {
+	    		
+	        mockMvc.perform(get(PATH+"/search/item/comment/12"))
+	        		.andDo(print())
+	        		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"))
+	        		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+	        		.andExpect(status().is(400))
+	        		;
+	    }*/
 }

@@ -334,12 +334,14 @@ public class ItemServiceTest {
 	    public void test_update_item() {
 	    		Item item = new Item("test-picture-001", "/some/local/path/", "this is a beautiful picture",ItemType.PICTURE);
 	    		Item itemUpdated = new Item("test-picture-001", "/some/local/path/", "this is a beautiful picture that has been modified",ItemType.PICTURE);
+	    		itemUpdated.setUpdatedAt(new Date());
 	    		
 	    		when(itemRepository.save(item)).thenReturn(itemUpdated);
+	    		assertNull(item.getUpdatedAt());
+	    		
 	    		Item result= itemService.updateItem(item);
 	
 	    		assertEquals(result,itemUpdated);
-	    		assertNull(item.getUpdatedAt());
 	    		assertNotNull(result.getUpdatedAt());
 		    	verify(itemRepository).save(item);
 		    	verifyNoMoreInteractions(itemRepository);
