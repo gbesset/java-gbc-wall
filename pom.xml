@@ -11,7 +11,7 @@
   
   <groupId>com.gbcreation</groupId>
   <artifactId>wall</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>GBCreation :: Java App :: Wall</name>
