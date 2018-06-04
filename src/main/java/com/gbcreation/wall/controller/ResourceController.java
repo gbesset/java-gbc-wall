@@ -1,18 +1,13 @@
 package com.gbcreation.wall.controller;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,8 +27,9 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 
 import com.gbcreation.wall.controller.exception.StorageException;
 import com.gbcreation.wall.controller.exception.StorageFileNotFoundException;
+import com.gbcreation.wall.model.Item;
+import com.gbcreation.wall.service.ItemService;
 import com.gbcreation.wall.service.StorageService;
-import com.gbcreation.wall.service.StorageServiceEx1;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,6 +45,9 @@ public class ResourceController {
 	 public ResourceController(StorageService storageService) {
 	        this.storageService = storageService;
 	    }
+	
+	@Autowired 
+	ItemService itemService;
 	 
 	@PostMapping("/post")
 	public ResponseEntity<Map<String,String>>handleFileUpload(@RequestParam("file") MultipartFile file,
@@ -81,6 +80,76 @@ public class ResourceController {
 		}
 	}
  
+	
+	@GetMapping("/delete")
+	public ResponseEntity<Map<String,String>>deleteFile(@RequestParam(value="id") Long id) {
+		Map<String,String> response = new HashMap<>();
+		
+		if (id == null) {
+			response.put("msg", "Please select a file!");
+            return new ResponseEntity(response, HttpStatus.OK);
+        }
+
+		try {
+			Item item = itemService.findById(id);
+			
+			boolean retour = storageService.delete(item.getPath(), item.getFile());
+			 		
+			if(retour) {
+				response.put("msg", "File: " + item.getFile() + " deleted !");
+				return ResponseEntity.status(HttpStatus.OK).body(response);
+			}
+			else {
+				response.put("msg", "Error while deleting of File: " + item.getFile() + "  !");
+				return ResponseEntity.status(HttpStatus.OK).body(response);
+			}
+			
+		} catch (StorageException se) {
+			response.put("msg", "FAIL to delete file from item id " + id + "!. " + se.getMessage());
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
+		}catch (Exception e) {
+			response.put("msg", "FAIL to delete file from item id " + id+ "!");
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
+		}
+	}
+ 
+	
+	@GetMapping("/rotate")
+	public ResponseEntity<Map<String,String>> rotateFile(@RequestParam(value="id") Long id, @RequestParam(value="angle") String angle) {
+		Map<String,String> response = new HashMap<>();
+		
+		if (id == null) {
+			response.put("msg", "Please select a file!");
+            return new ResponseEntity(response, HttpStatus.OK);
+        }
+
+		try {
+			Item item = itemService.findById(id);
+			
+			if("LEFT".equalsIgnoreCase(angle)) {
+				storageService.rotateLeft(item.getPath(), item.getFile());
+			}
+			else if ("RIGHT".equalsIgnoreCase(angle)) {
+				storageService.rotateRight(item.getPath(), item.getFile());
+			}
+			else {
+				response.put("msg", "Angle not defined: " + angle + " [Right/left]");
+				return ResponseEntity.status(HttpStatus.OK).body(response);
+			}
+			 		
+			response.put("msg", "File: " + item.getFile() + " rotated !");
+			return ResponseEntity.status(HttpStatus.OK).body(response);
+			
+		} catch (StorageException se) {
+			response.put("msg", "FAIL to delete file from item id " + id + "!. " + se.getMessage());
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
+		}catch (Exception e) {
+			response.put("msg", "FAIL to delete file from item id " + id+ "!");
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
+		}
+	}
+ 
+	
 	
 
 	@GetMapping("/all")
