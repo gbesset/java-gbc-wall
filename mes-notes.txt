@@ -19,11 +19,24 @@ ex 1 481 027 580 000  06/12/16 12:33
 Script lancement app avec un profil PROD
 java -jar .... -profile....
 
-### Done
+### Requetes Done en attendant liquibase.
 Modif nom colonne dans table sur BDD locale
 ALTER TABLE gbc_wall_comment RENAME is_appoved TO is_approved;
 
 #GRANT SELECT, INSERT, UPDATE, DELETE ON myTable TO myUser;
+
+# Modif droit sur la sequence
+GRANT ALL ON SEQUENCE gbc_wall_item_id_seq TO user_wall;
+GRANT ALL ON SEQUENCE gbc_wall_COMMENT_id_seq TO user_wall;
+
+# modif path images
+update gbc_wall_item set path ='/v1'
+
+# Creation lien symbolique vers dossier dans asset/
+LOCAL
+ln -s /Users/gbesset/wks_java/gbcreation/gbc-wall-angular5-app/src/assets/__img_wall/
+PROD
+ln -s /home/gbcreation/www/karen.guiom/client/assets/wall/
 
 
 http://localhost:8080/api/wall/items

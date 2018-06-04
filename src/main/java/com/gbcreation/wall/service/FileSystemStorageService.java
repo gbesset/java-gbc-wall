@@ -1,5 +1,7 @@
 package com.gbcreation.wall.service;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -12,6 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
@@ -31,10 +35,18 @@ import lombok.extern.slf4j.Slf4j;
 public class FileSystemStorageService implements StorageService{
 	
 	private final Path rootLocation;
+	
+	private final int maxSize;
+	
+	private final String tempPath = "/temp";
 
+	@Resource
+	ImageResizer imageResizer;
+		
 	@Autowired
-	public FileSystemStorageService(@Value("${images.folder}") String rootPath) {
+	public FileSystemStorageService(@Value("${images.folder}") String rootPath, @Value("${images.maxSize}") int maxSize) {
 		this.rootLocation = Paths.get(rootPath);
+		this.maxSize = new Integer(maxSize);
 	}
 
 	@Override
@@ -59,23 +71,65 @@ public class FileSystemStorageService implements StorageService{
 			String fileNewName = filename.substring(0, file.getOriginalFilename().lastIndexOf('.')) + "-" + hash + extension;
 			
 			try (InputStream inputStream = file.getInputStream()) {
+				//Copy file into temp folder with fileName !! (to replace if multiple upload))
+				Path tempFolder =  Paths.get(this.rootLocation.toString()+tempPath);
+				if(!Files.exists(tempFolder)) {
+					log.info("Directory {} doesn't exist. Need to create {}", tempFolder, tempPath);
+					Files.createDirectory(tempFolder);
+					log.info("Directory {} Created !!", tempPath);;
+				}
+				Files.copy(inputStream,tempFolder.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
+				log.info("FileSystemStorageService :  copy file {} DONE", filename);
+				
+				//Prepare Dest folder
 				Path dest =  Paths.get(this.rootLocation.toString()+path);
 				if(!Files.exists(dest)) {
 					log.info("Directory {} doesn't exist. Need to create {}", dest, path);
 					Files.createDirectory(dest);
 					log.info("Directory {} Created !!", dest);;
 				}
-				Files.copy(inputStream,dest.resolve(fileNewName), StandardCopyOption.REPLACE_EXISTING);
-				log.info("FileSystemStorageService :  copy file {} DONE", fileNewName);
+				
+				double percent = calculatePercentage(file.getInputStream());
+				//No resize needed
+				if(percent == 1.0) {
+					Files.copy(inputStream,dest.resolve(fileNewName), StandardCopyOption.REPLACE_EXISTING);
+					log.info("FileSystemStorageService :  copy file {} DONE", fileNewName);
+				}
+				else {
+					log.info("Pourcentage calculé: {} pour tomber sur resolution max {}",percent, maxSize);
+					//resize file and store it into dest folder
+					imageResizer.resize(ImageIO.read(inputStream), dest.resolve(fileNewName), percent);
+					
+					
+					//Suppression image dans /temp
+					log.debug("Delete file in  /temp {}",tempFolder.resolve(filename).toString());
+					tempFolder.resolve(filename).toFile().delete();
+					log.debug("Delete file in /temp DONE");
+				}
 				
 				Map<String,String> response = new HashMap<>();
 				response.put("file",fileNewName);
 				response.put("createdAt",""+createdAt.getTime());
 				return response;
 			}
+			
 		}
 		catch (IOException e) {
 			throw new StorageException("Failed to store file " + filename, e);
+		}
+	}
+
+	private double calculatePercentage(InputStream inputStream) throws IOException {
+		BufferedImage inputImage = ImageIO.read(inputStream);
+		int max = Math.max(inputImage.getWidth(), inputImage.getHeight());
+
+		if(max<= maxSize) {
+			return 1.0;
+		}
+		else{
+			double percent = (100 * maxSize / max);
+			log.info("Pourcentage calculé {}", percent);
+			return percent / 100;
 		}
 	}
 
@@ -95,6 +149,39 @@ public class FileSystemStorageService implements StorageService{
 		return new Date();
 	}
 
+	@Override
+	public boolean delete(String path, String fileName) {
+		Path folder =  Paths.get(this.rootLocation.toString()+path);
+		
+		return folder.resolve(fileName).toFile().delete();
+	}
+	
+	@Override
+	public void rotateLeft(String path, String fileName) throws IOException {
+		Path folder =  Paths.get(this.rootLocation.toString()+path);
+		BufferedImage image = ImageIO.read(folder.resolve(fileName).toFile());
+		
+		BufferedImage imageRotated = imageResizer.rotate(image, Math.toRadians(-90));
+		String formatName = fileName.substring(fileName
+                .lastIndexOf(".") + 1);
+		
+		ImageIO.write(imageRotated, "jpg", folder.resolve(fileName).toFile());
+		
+	}
+
+	@Override
+	public void rotateRight(String path, String fileName) throws IOException {
+		Path folder =  Paths.get(this.rootLocation.toString()+path);
+		BufferedImage image = ImageIO.read(folder.resolve(fileName).toFile());
+		
+		BufferedImage imageRotated = imageResizer.rotate(image, Math.toRadians(90));
+		
+		String formatName = fileName.substring(fileName
+                .lastIndexOf(".") + 1);
+		
+		ImageIO.write(imageRotated, "jpg", folder.resolve(fileName).toFile());
+	}
+	
 	@Override
 	public Stream<Path> loadAll(String path) {
 		try {
@@ -136,17 +223,18 @@ public class FileSystemStorageService implements StorageService{
 
 	@Override
 	public void deleteAll() {
-		FileSystemUtils.deleteRecursively(rootLocation.toFile());
+		//FileSystemUtils.deleteRecursively(rootLocation.toFile());
 	}
 
 	@Override
 	public void init() {
-		try {
+		/*try {
 			log.debug("FileSystemStorageService : init before creting repo {}",rootLocation);
 			Files.createDirectories(rootLocation);
 		}
 		catch (IOException e) {
 			throw new StorageException("Could not initialize storage", e);
-		}
+		}*/
 	}
+
 }
