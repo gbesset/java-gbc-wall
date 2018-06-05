@@ -18,17 +18,16 @@ public class ImageResizer {
 
 	 
 	 
-	 public static void resize(BufferedImage inputImage, Path outputImagePath, int scaledWidth, int scaledHeight)
-	            throws IOException {
+	 public static void resize(BufferedImage bufferedImage, Path outputImagePath, int scaledWidth, int scaledHeight) throws IOException {
 
-		 int type = inputImage.getType() == 0? BufferedImage.TYPE_INT_ARGB : inputImage.getType();
+		 	int type = bufferedImage.getType() == 0? BufferedImage.TYPE_INT_ARGB : bufferedImage.getType();
 	        
 	        // creates output image
 	        BufferedImage outputImage = new BufferedImage(scaledWidth, scaledHeight, type);
 	 
 	        // scales the input image to the output image
 	        Graphics2D g2d = outputImage.createGraphics();
-	        g2d.drawImage(inputImage, 0, 0, scaledWidth, scaledHeight, null);
+	        g2d.drawImage(bufferedImage, 0, 0, scaledWidth, scaledHeight, null);
 	        g2d.dispose();
 	 
 	        // extracts extension of output file
@@ -56,13 +55,13 @@ public class ImageResizer {
 	    }
 
 	 
-	 public static void resize(BufferedImage inputImage, Path outputImagePath, double percent) throws IOException {
-	        int scaledWidth = (int) (inputImage.getWidth() * percent);
-	        int scaledHeight = (int) (inputImage.getHeight() * percent);
-	        log.info("Image initiale en  {} x {}", inputImage.getWidth(), inputImage.getHeight());
+	 public static void resize(BufferedImage bufferedImage, Path outputImagePath, double percent) throws IOException {
+	        int scaledWidth = (int) (bufferedImage.getWidth() * percent);
+	        int scaledHeight = (int) (bufferedImage.getHeight() * percent);
+	        log.info("Image initiale en  {} x {}", bufferedImage.getWidth(), bufferedImage.getHeight());
 	        log.info("Redimensionnement de l'image en {} x {}", scaledWidth, scaledHeight);
 	        
-	        resize(inputImage, outputImagePath, scaledWidth, scaledHeight);
+	        resize(bufferedImage, outputImagePath, scaledWidth, scaledHeight);
 	 }
 	 
 	 
@@ -76,15 +75,14 @@ public class ImageResizer {
 		 
 	  }
 
-	 @Deprecated
-	 public static void resize(InputStream inputStreamImage, Path outputImagePath, double percent) throws IOException {
-	        BufferedImage inputImage = ImageIO.read(inputStreamImage);
+	 public static void resize(InputStream inputStream, Path outputImagePath, double percent) throws IOException {
+	        BufferedImage inputImage = ImageIO.read(inputStream);
 	        int scaledWidth = (int) (inputImage.getWidth() * percent);
 	        int scaledHeight = (int) (inputImage.getHeight() * percent);
 	        log.info("Image initiale en  {} x {}", inputImage.getWidth(), inputImage.getHeight());
 	        log.info("Redimensionnement de l'image en {} x {}", scaledWidth, scaledHeight);
-	        
-	        resize(inputStreamImage, outputImagePath, scaledWidth, scaledHeight);
+	        BufferedImage test = ImageIO.read(inputStream);
+	        resize(test, outputImagePath, scaledWidth, scaledHeight);
 	    }
 	 
 	 

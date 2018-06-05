@@ -126,14 +126,14 @@ public class ResourceController {
 		try {
 			Item item = itemService.findById(id);
 			
-			if("LEFT".equalsIgnoreCase(angle)) {
+			if(item != null && "LEFT".equalsIgnoreCase(angle)) {
 				storageService.rotateLeft(item.getPath(), item.getFile());
 			}
-			else if ("RIGHT".equalsIgnoreCase(angle)) {
+			else if (item != null && "RIGHT".equalsIgnoreCase(angle)) {
 				storageService.rotateRight(item.getPath(), item.getFile());
 			}
 			else {
-				response.put("msg", "Angle not defined: " + angle + " [Right/left]");
+				response.put("msg", "Item not found with id "+id+" or Angle not defined: " + angle + " [Right/left]");
 				return ResponseEntity.status(HttpStatus.OK).body(response);
 			}
 			 		
@@ -141,10 +141,10 @@ public class ResourceController {
 			return ResponseEntity.status(HttpStatus.OK).body(response);
 			
 		} catch (StorageException se) {
-			response.put("msg", "FAIL to delete file from item id " + id + "!. " + se.getMessage());
+			response.put("msg", "FAIL to rotate file from item id " + id + "!. " + se.getMessage());
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
 		}catch (Exception e) {
-			response.put("msg", "FAIL to delete file from item id " + id+ "!");
+			response.put("msg", "FAIL to rotate file from item id " + id+ "!");
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(response);
 		}
 	}

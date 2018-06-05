@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -89,23 +88,24 @@ public class FileSystemStorageService implements StorageService{
 					log.info("Directory {} Created !!", dest);;
 				}
 				
-				double percent = calculatePercentage(file.getInputStream());
+				BufferedImage bufferedImage = (BufferedImage)ImageIO.read(file.getInputStream());
+				double percent = calculatePercentage(bufferedImage);
 				//No resize needed
 				if(percent == 1.0) {
-					Files.copy(inputStream,dest.resolve(fileNewName), StandardCopyOption.REPLACE_EXISTING);
+					Files.copy(file.getInputStream(), dest.resolve(fileNewName), StandardCopyOption.REPLACE_EXISTING);
 					log.info("FileSystemStorageService :  copy file {} DONE", fileNewName);
 				}
 				else {
 					log.info("Pourcentage calculé: {} pour tomber sur resolution max {}",percent, maxSize);
 					//resize file and store it into dest folder
-					imageResizer.resize(ImageIO.read(inputStream), dest.resolve(fileNewName), percent);
-					
-					
-					//Suppression image dans /temp
-					log.debug("Delete file in  /temp {}",tempFolder.resolve(filename).toString());
-					tempFolder.resolve(filename).toFile().delete();
-					log.debug("Delete file in /temp DONE");
+					imageResizer.resize(bufferedImage, dest.resolve(fileNewName), percent);
 				}
+					
+				//Suppression image dans /temp
+				log.debug("Delete file in  /temp {}",tempFolder.resolve(filename).toString());
+				tempFolder.resolve(filename).toFile().delete();
+				log.debug("Delete file in /temp DONE");
+			
 				
 				Map<String,String> response = new HashMap<>();
 				response.put("file",fileNewName);
@@ -114,21 +114,20 @@ public class FileSystemStorageService implements StorageService{
 			}
 			
 		}
-		catch (IOException e) {
+		catch (Exception e) {
 			throw new StorageException("Failed to store file " + filename, e);
 		}
 	}
 
-	private double calculatePercentage(InputStream inputStream) throws IOException {
-		BufferedImage inputImage = ImageIO.read(inputStream);
-		int max = Math.max(inputImage.getWidth(), inputImage.getHeight());
+	private double calculatePercentage(BufferedImage bufferedImage) throws IOException {
 
-		if(max<= maxSize) {
+		int max = Math.max(bufferedImage.getWidth(), bufferedImage.getHeight());
+
+		if(max <= maxSize) {
 			return 1.0;
 		}
 		else{
 			double percent = (100 * maxSize / max);
-			log.info("Pourcentage calculé {}", percent);
 			return percent / 100;
 		}
 	}
@@ -165,7 +164,7 @@ public class FileSystemStorageService implements StorageService{
 		String formatName = fileName.substring(fileName
                 .lastIndexOf(".") + 1);
 		
-		ImageIO.write(imageRotated, "jpg", folder.resolve(fileName).toFile());
+		ImageIO.write(imageRotated, formatName, folder.resolve(fileName).toFile());
 		
 	}
 
@@ -179,7 +178,7 @@ public class FileSystemStorageService implements StorageService{
 		String formatName = fileName.substring(fileName
                 .lastIndexOf(".") + 1);
 		
-		ImageIO.write(imageRotated, "jpg", folder.resolve(fileName).toFile());
+		ImageIO.write(imageRotated, formatName, folder.resolve(fileName).toFile());
 	}
 	
 	@Override
