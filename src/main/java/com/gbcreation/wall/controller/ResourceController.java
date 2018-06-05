@@ -161,7 +161,7 @@ public class ResourceController {
 	
 	
 
-	@GetMapping("/all")
+	/*@GetMapping("/all")
 	public ResponseEntity<List<String>> listUploadedFiles(Model model,@RequestParam(value="path", required = false) String path) throws IOException {
 		
 		if(path == null) {
@@ -179,8 +179,10 @@ public class ResourceController {
 		//model.addAttribute("files", fileNames);
 				 
 		return ResponseEntity.ok().body(fileNames);
-	}
+	}*/
  
+	/*
+	 * a mettre ? error a cause pathVariable?
 	@GetMapping("/{filename:.+}")
 	@ResponseBody
 	public ResponseEntity<Resource> serveFile(@PathVariable String fileName) {
@@ -190,7 +192,7 @@ public class ResourceController {
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
 				.body(file);
-	}
+	}*/
 	
 	@ExceptionHandler(StorageFileNotFoundException.class)
     public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
