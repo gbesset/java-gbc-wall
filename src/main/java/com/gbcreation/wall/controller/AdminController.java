@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/admin")
 @Slf4j
-@CrossOrigin(origins = {"http://localhost:4200", "http://k.g.gbcreation.fr"} )
+@CrossOrigin(origins = {"${settings.cors_origin}"})
 public class AdminController {
 
 	@Resource

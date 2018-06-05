@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/home")
-@CrossOrigin(origins = {"http://localhost:4200", "http://k.g.gbcreation.fr"})
+@CrossOrigin(origins = {"${settings.cors_origin}"})
 @Slf4j
 public class HomeController {
 
