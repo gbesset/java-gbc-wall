@@ -113,7 +113,7 @@ public class ResourceControllerTest {
 	    @SuppressWarnings("unchecked")
 	    @Test
 	    public void should404WhenMissingFile() throws Exception {
-	        given(this.storageService.loadAsResource("test.txt")).willThrow(StorageFileNotFoundException.class);
+	        given(this.storageService.loadAsResource("path/", "test.txt")).willThrow(StorageFileNotFoundException.class);
 
 	        this.mvc.perform(get(PATH+"/test.txt"))
 	        .andExpect(status().isNotFound());

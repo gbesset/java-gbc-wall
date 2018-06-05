@@ -196,27 +196,23 @@ public class FileSystemStorageService implements StorageService{
 
 	}
 
-	@Override
-	public Path load(String filename) {
-		return rootLocation.resolve(filename);
-	}
 
 	@Override
-	public org.springframework.core.io.Resource loadAsResource(String filename) {
+	public org.springframework.core.io.Resource loadAsResource(String path, String fileName) {
 		try {
-			Path file = load(filename);
+			Path file =  Paths.get(this.rootLocation.toString()+path).resolve(fileName);
+			
 			org.springframework.core.io.Resource resource = new UrlResource(file.toUri());
 			if (resource.exists() || resource.isReadable()) {
 				return resource;
 			}
 			else {
-				throw new StorageFileNotFoundException(
-						"Could not read file: " + filename);
+				throw new StorageFileNotFoundException("Could not read file: " + fileName);
 
 			}
 		}
 		catch (MalformedURLException e) {
-			throw new StorageFileNotFoundException("Could not read file: " + filename, e);
+			throw new StorageFileNotFoundException("Could not read file: " + fileName, e);
 		}
 	}
 

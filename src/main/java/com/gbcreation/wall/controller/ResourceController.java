@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @Slf4j
 @RequestMapping("/api/resources")
-@CrossOrigin(origins = {"http://localhost:4200", "http://k.g.gbcreation.fr"})
+@CrossOrigin(origins = {"${settings.cors_origin}"})
 public class ResourceController {
 	
 	private	StorageService storageService;
@@ -149,6 +149,15 @@ public class ResourceController {
 		}
 	}
  
+	@GetMapping("/get/{path}")
+	@ResponseBody
+	public ResponseEntity<Resource> getFile(@PathVariable String path, @RequestParam String fileName) {
+		log.info("retrieve picture in path {} named {}", "/"+path, fileName);
+		Resource file = storageService.loadAsResource("/"+path,fileName);
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
+				.body(file);
+	}
 	
 	
 
@@ -174,8 +183,10 @@ public class ResourceController {
  
 	@GetMapping("/{filename:.+}")
 	@ResponseBody
-	public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-		Resource file = storageService.loadAsResource(filename);
+	public ResponseEntity<Resource> serveFile(@PathVariable String fileName) {
+		//TODO    NE PEUTMARCHER... a virer ?
+		//a quoi ca sert a partir du file name?
+		Resource file = storageService.loadAsResource("", fileName);
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
 				.body(file);

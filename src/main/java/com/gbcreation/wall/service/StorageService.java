@@ -18,14 +18,14 @@ public interface StorageService {
     
     void rotateRight(String path, String fileName) throws IOException;
 	
+    Resource loadAsResource(String path, String filename);
+    
+    
     
     
     Stream<Path> loadAll( String path);
 
-    Path load(String filename);
-
-    Resource loadAsResource(String filename);
-    
+   
     
     
     void init();
