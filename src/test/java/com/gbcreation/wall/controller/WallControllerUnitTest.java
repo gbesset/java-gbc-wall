@@ -35,6 +35,7 @@ import com.gbcreation.wall.model.Item;
 import com.gbcreation.wall.model.ItemType;
 import com.gbcreation.wall.service.CommentService;
 import com.gbcreation.wall.service.ItemService;
+import com.gbcreation.wall.service.UserService;
 
 
 @RunWith(SpringRunner.class)
@@ -49,6 +50,9 @@ public class WallControllerUnitTest {
 
 	@MockBean
 	private CommentService commentServiceMock;
+	
+	@MockBean
+	private UserService userServiceMock;
 	
 	private static String PATH = "/api/wall";
 	

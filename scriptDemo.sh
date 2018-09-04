@@ -1,0 +1,1 @@
+java -jar -Dspring.profiles.active=demo target/monfichier.jar > server.log &

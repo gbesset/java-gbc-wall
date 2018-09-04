@@ -1,7 +1,6 @@
 package com.gbcreation.wall.controller;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gbcreation.wall.controller.exception.ItemNotFoundException;
 import com.gbcreation.wall.model.Comment;
 import com.gbcreation.wall.model.Item;
+import com.gbcreation.wall.model.User;
 import com.gbcreation.wall.service.CommentService;
 import com.gbcreation.wall.service.ItemService;
+import com.gbcreation.wall.service.UserService;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -43,14 +44,17 @@ public class WallController {
 	@Resource
 	private CommentService commentService;
 
+	@Resource
+	private UserService userService;
 	
 	@RequestMapping(value="/login",method=RequestMethod.POST, produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody Map<String,String> login(@RequestBody String user) {
+	public @ResponseBody Map<String,String> login(@RequestBody User user) {
 		log.info("WallController: login -->{}",user);
 		Map<String,String> response = new HashMap<>();
 		
 		//En attendant mise en place spring security et JWT
-		if("gbe@fr".equals(user)) {
+		User u = userService.login(user.getLogin(), user.getPassword());
+		if(u != null) {
 			response.put("avaibility", Instant.now().toString());
 			response.put("status", "connected");
 		}

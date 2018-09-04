@@ -37,3 +37,4 @@ mySandboxApp.iml
 .classpath
 .project
 
+src/main/resources/application-demo.properties
